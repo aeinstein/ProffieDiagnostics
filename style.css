@@ -329,6 +329,14 @@ input[type="number" i] {
     white-space: pre;
 }
 
+#console .receive {
+    color: green;
+}
+
+#console .send {
+    color: red;
+}
+
 #volume {
     width: 20%;
 }

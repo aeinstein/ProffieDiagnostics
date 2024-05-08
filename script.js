@@ -126,7 +126,7 @@ function OnData(data) {
         ret = ret.split("\r").join("");
 
         console.log('> ' + ret);
-        addMessage(ret);
+        addMessage(ret, "in");
 
         if (callback_queue.length) {
             last_callback = Date.now();
@@ -136,10 +136,21 @@ function OnData(data) {
     }
 }
 
-function addMessage(txt){
+function addMessage(txt, dir){
     const console = FIND("CONSOLE");
 
-    console.innerHTML += txt;
+    switch(dir){
+    case "in":
+        console.innerHTML += "<span class='receive'>" + txt + "</span>";
+        break;
+    case "out":
+        console.innerHTML += "<span class='send'>" + txt + "</span>";
+        break;
+
+    default:
+        console.innerHTML += txt;
+        break;
+    }
 
     console.scrollTo(0, console.scrollHeight)
 }
@@ -178,7 +189,7 @@ function Send(cmd) {
     if (usb_device) {
         return new Promise(function (resolve, reject) {
                 console.log("Sending " + cmd);
-                addMessage("# " + cmd + "\n");
+                addMessage(cmd + "\n", "out");
                 if (callback_queue.length === 0) last_callback = Date.now();
                 callback_queue.push([resolve, reject])
                 RunWatchDog();
