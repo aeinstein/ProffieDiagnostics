@@ -1,0 +1,149 @@
+<head>
+
+	<link rel="manifest" href="manifest.json">
+	<link rel="shortcut icon" type="image/png" href="icon-256.png">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<meta name="msapplication-TileImage" content="icon-256.png">
+	<meta name="msapplication-TileColor" content="#2F3BA2">
+	<meta name=viewport content='width=850'>
+	<title></title>
+</head>
+<script src="script.js"></script>
+<body onload='Init();'>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(function () {
+            console.log('Service Worker Registered');
+        });
+    }
+</script>
+
+
+<div class=pwbox id=while_disconnected>
+  <div id=connect_usb style='visibility:hidden;' class=control>
+     <button class=mybutton2 type=button onclick='RunUSB()'>usb</button>
+  </div>
+  <div id=connect_ble style='visibility:hidden;'>
+    <span id=pwspan style='display:none'>Password:&nbsp;<input class=pwinput type=password id=password
+															   onkeydown="if (event.keyCode == 13) Run();"></span>
+    <div class=control>
+      <button class=mybutton2 type=button onclick='Run()'>BLE</button>
+    </div>
+    <br>
+  </div>
+  <div id=EMSG></div>
+</div>
+<!-- Send Command: <input type=text id=textField onkeydown="if (event.keyCode == 13) SendField();"><br> -->
+
+<div id=while_connected class=container style='visibility:hidden;'>
+	<div class="top" id=top_message>
+		<div class=settingsbutton style='visibility:hidden;' id=settingsbutton onclick='ToggleSettingsMode()'>&#x2699;</div>
+		<div class=editbutton style='visibility:hidden;' id=editbutton onclick='ToggleEditMode()'>&#x270E;</div>
+		<div class=appname>ProffieOS Diagnostics</div>
+		<br/>
+		<div class="slidecontainer">
+			Volume: <input id=volume type=range min=0 max=2000 class="slider" oninput='UpdateVolume();' onchange='UpdateVolume();'><span id=volume_label>VOL</span>
+		</div>
+
+		<div class="slidecontainer">
+			Battery: <span id=voltage>---</span> volts.
+		</div>
+
+		<span id=reconnecting_message style='visibility:hidden;'>
+			Reconnecting...
+	  	</span>
+
+	</div>
+
+	<div class=content>
+
+		<div id=PRESETS class=scrollable>
+			<div class=header>
+				<span class=title>Presets</span>
+			</div>
+			<span id=presets class=centered>
+			   Waiting to list presets...
+			</span>
+		</div>
+
+		<div id=edit_pane class=edit_scrollable style='display:none;'>
+			<div class=header><span class=title>Edit</span><br></div>
+			<span id=edit_pane2 class=centered>Getting options...</span>
+		</div>
+
+		<div id=settings_pane class=edit_scrollable style='display:none;'>
+			<div class=header><span class=title>Settings</span><br></div>
+			<span id=settings_pane2 class=centered>Getting options....</span>
+		</div>
+
+		<div id=TRACKS class=scrollable>
+			<div class=header>
+				<span class=title>Tracks</span>
+			</div>
+			<span id=tracks class=centered>Waiting to list tracks...</span>
+		</div>
+
+		<div id=CTRL class=scrollable>
+			<div class=header>
+				<span class=title>Controls</span>
+			</div>
+			<div id=controls class=centered>
+				<div id=onbutton class=control>
+				   <span class=title onclick='On();'>on</span>
+				</div>
+				<div id=offbutton class=control>
+				   <span class=title onclick='Off();'>off</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("clash");'>clash</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("blast");'>blast</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("force");'>force</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("lockup");'>lockup</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("drag");'>drag</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("melt");'>melt</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("stab");'>stab</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("lblock");'>lightning</span>
+				</div>
+				<div class=control>
+				   <span class=title onclick='Send("stop_track");'>stop track</span>
+				</div>
+				<div class=control>
+					<span class=title onclick='Send("scanid");'>ScanID</span>
+				</div>
+    		</div>
+		</div>
+
+
+	</div>
+	<br>
+	<div id="CONSOLE">
+		<div class=header>
+			<span class=title>Console</span>
+		</div>
+	</div>
+
+	</div>
+
+	<span class=pwbox id=disconnected style='visibility:hidden'>
+    <div id=reconnectbutton class=big_control>
+       <button class=mybutton2 type=button onclick='location.reload()'>reconnect</button>
+    </div>
+</span>
+
+</body>
+
