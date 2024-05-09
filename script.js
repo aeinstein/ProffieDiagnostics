@@ -137,18 +137,23 @@ function OnData(data) {
 }
 
 function addMessage(txt, dir){
-    const console = FIND("CONSOLE");
+    const console = FIND("ConsoleContent");
+
+    while(console.childNodes.length > 200) {
+        console.firstChild.remove();
+    }
 
     switch(dir){
     case "in":
         console.innerHTML += "<span class='receive'>" + txt + "</span>";
         break;
+
     case "out":
         console.innerHTML += "<span class='send'>" + txt + "</span>";
         break;
 
     default:
-        console.innerHTML += txt;
+        console.innerHTML += "<span>" + txt + "</span>";
         break;
     }
 
@@ -159,12 +164,7 @@ function OnRX(event) {
     OnData(event.target.value);
 }
 
-function concatTypedArrays(a, b) { // a, b TypedArray of same type
-    const c = new (a.constructor)(a.length + b.length);
-    c.set(a, 0);
-    c.set(b, a.length);
-    return c;
-}
+
 
 function WatchDog() {
     watchdog_running = false;
@@ -381,8 +381,6 @@ function OnStyleSelect(blade) {
     SaveStyle(blade);
 }
 
-
-
 function SaveStyle(blade) {
     const style_select = FIND('style_select' + blade);
     const style = style_select.value;
@@ -427,7 +425,6 @@ function make_name_field(value) {
     return "<div class=edit><span class=title>name<br><input type=text class=myinput id=name_input value='" + value + "' onchange='SaveName()'></span></div>\n";
 }
 
-
 function SaveVariation() {
     const variation_slider = FIND('variation_slider');
     console.log("SAVE VARIATION " + variation_slider.value);
@@ -443,7 +440,6 @@ function SaveVariation() {
     //	SetPreset(current_preset_num) //no need, variation is always updates directly
     UpdatePresets();
 }
-
 
 function SetVariation() {
     const set_variation_field = FIND('variation_field');
@@ -465,7 +461,6 @@ function UpdateVariation(value) {
     set_variation_field.value = tmp;
     SaveVariation(); // now do the actual update
 }
-
 
 function make_variation_field(value) {
     let ret = "<div class=edit>";
@@ -528,8 +523,6 @@ function updateEditPane(preset) {
     edit_pane.innerHTML = tmp;
 }
 
-
-
 function showCurrentPreset(preset) {
     preset = parseInt(preset);
     if (current_preset_num == preset) return;
@@ -552,14 +545,14 @@ function updateCurrentPreset() {
 
 async function On() {
     await Send('on');
-    FIND('onbutton').style.background = '#505080';
-    FIND('offbutton').style.background = '#101040';
+    FIND('onbutton').className = 'control active';
+    FIND('offbutton').className = 'control';
 }
 
 async function Off() {
     await Send('off');
-    FIND('offbutton').style.background = '#505080';
-    FIND('onbutton').style.background = '#101040';
+    FIND('offbutton').className = 'control';
+    FIND('onbutton').className = 'control active';
 }
 
 function showCurrentTrack(track) {
@@ -596,7 +589,7 @@ async function DropEvent(n) {
         return;
     }
     Send("move_preset " + n);
-    var x = presets[dragging];
+    const x = presets[dragging];
     presets = presets.slice(0, dragging).concat(presets.splice(dragging + 1, presets.length));
     presets = presets.slice(0, n).concat([x], presets.slice(n, presets.length));
     UpdatePresets();
@@ -636,10 +629,9 @@ async function PlayTrack(track) {
 }
 
 function SendField() {
-    const value = FIND('textField').value + '\n';
+    const value = FIND('textField').value;
+    Send(value);
     FIND('textField').value = "";
-    let encoder = new TextEncoder('utf-8');
-    tx.writeValue(encoder.encode(value));
 }
 
 function sleep(ms) {
@@ -1310,6 +1302,13 @@ function to16bitcolor(val) {
     return to16bitlinear(val.substr(1, 2)) + "," +
         to16bitlinear(val.substr(3, 2)) + "," +
         to16bitlinear(val.substr(5, 2));
+}
+
+function concatTypedArrays(a, b) { // a, b TypedArray of same type
+    const c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
 }
 
 function Init() {

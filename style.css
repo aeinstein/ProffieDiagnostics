@@ -47,6 +47,10 @@
     cursor: pointer;
 }
 
+.active {
+    background: rgb(80, 80, 128);
+}
+
 .big_control {
     border-radius: 15px 50px;
     border: 2px solid #6060aa;
@@ -290,7 +294,7 @@ input[type='checkbox'] {
 }
 
 input[type="number" i] {
-    width: 30px;
+    width: 70px;
 }
 
 .slidecontainer {
@@ -320,21 +324,31 @@ input[type="number" i] {
 }
 
 #console {
-    overflow: auto;
-    height: 20%;
+    height: 30%;
     border: 1px solid #373737;
     margin: 5px;
     box-sizing: border-box;
-    font-family: monospace;
-    white-space: pre;
 }
 
-#console .receive {
+#ConsoleContent {
+    overflow-y: scroll;
+    overflow-x: clip;
+    font-family: monospace;
+    white-space: break-spaces;
+    height: calc(100% - 50px);
+    width: 100%;
+}
+
+#ConsoleContent .receive {
     color: green;
 }
 
-#console .send {
+#ConsoleContent .send {
     color: red;
+}
+
+#cmdLine {
+
 }
 
 #volume {

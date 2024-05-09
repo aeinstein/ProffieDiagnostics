@@ -34,8 +34,6 @@
   </div>
   <div id=EMSG></div>
 </div>
-<!-- Send Command: <input type=text id=textField onkeydown="if (event.keyCode == 13) SendField();"><br> -->
-
 <div id=while_connected class=container style='visibility:hidden;'>
 	<div class="top" id=top_message>
 		<div class=settingsbutton style='visibility:hidden;' id=settingsbutton onclick='ToggleSettingsMode()'>&#x2699;</div>
@@ -139,6 +137,11 @@
 	<div id="CONSOLE">
 		<div class=header>
 			<span class=title>Console</span>
+		</div>
+		<div id="ConsoleContent"></div>
+		<div style="width: 100%">
+			<input class="myinput" onkeyup="if (event.keyCode === 13) SendField();" style="width: calc(100% - 100px); text-align: left" type="text" id="textField">
+			<button style="float: right; width: 95px" onclick="SendField();">Send</button>
 		</div>
 	</div>
 
