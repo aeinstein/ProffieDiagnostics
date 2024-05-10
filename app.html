@@ -9,21 +9,17 @@
 	<title></title>
 </head>
 <script src="script.js"></script>
-<body onload='Init();'>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then(function () {
-            console.log('Service Worker Registered');
-        });
-    }
-</script>
-
+<body>
 
 <div class=pwbox id=while_disconnected>
   <div id=connect_usb style='visibility:hidden;' class=control>
-     <button class=mybutton2 type=button onclick='RunUSB()'>usb</button>
+     <button class=mybutton2 type=button onclick='RunUSB()'>USB</button>
   </div>
+
+	<div id=connect_serial style='visibility:hidden;' class=control>
+		<button class=mybutton2 type=button onclick='RunSerial()'>Serial</button>
+	</div>
+
   <div id=connect_ble style='visibility:hidden;'>
     <span id=pwspan style='display:none'>Password:&nbsp;<input class=pwinput type=password id=password
 															   onkeydown="if (event.keyCode == 13) Run();"></span>
@@ -34,6 +30,7 @@
   </div>
   <div id=EMSG></div>
 </div>
+
 <div id=while_connected class=container style='visibility:hidden;'>
 	<div class="top" id=top_message>
 		<div class=settingsbutton style='visibility:hidden;' id=settingsbutton onclick='ToggleSettingsMode()'>&#x2699;</div>
