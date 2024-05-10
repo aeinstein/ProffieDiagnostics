@@ -19,6 +19,8 @@ let endpointIn;
 // Serial vars
 let serial_port;
 let versionLoaded = false;
+let topCalled = false;
+let processes = {};
 
 let send_buf = [];
 let current_packet;
@@ -157,7 +159,6 @@ function OnSerialData(data){
 
 
     if(!versionLoaded) {
-
         let matches = data.match("v([0-9])*\.([0-9]*)");
 
         if(matches){
@@ -180,24 +181,52 @@ function OnSerialData(data){
                 FIND("txtInstalled").innerHTML = d[1];
                 versionLoaded = true;
                 break;
-
             }
         }
 
         if(data.startsWith("config/")){
             FIND("txtConfig").innerHTML = data;
         }
-
-
     }
 
+    if(topCalled){
+        if(data.indexOf(": ") > 0) {
+            let d = data.split(": ");
+            processes[d[0]] = d[1];
 
+            if(d[0] === "MonitorHelper loop") {
+                topCalled = false;
+                FIND("top").innerHTML = displayTop();
+                FIND("top").style.visibility = "visible";
+            }
+        }
+    }
 }
+
+function displayTop(){
+    let ret = "<table>";
+
+    for (const property in processes) {
+        ret += "<tr>";
+        ret += "<td>" + property + "</td>";
+        ret += "<td>" + processes[property] + "</td>";
+        ret += "</tr>";
+    }
+
+    ret += "</table>";
+
+    return ret;
+}
+
+function getTop(){
+    topCalled = true;
+    SendSerial("top");
+}
+
 
 function getVersion(){
     versionLoaded = false;
     SendSerial("version");
-
 }
 
 function addMessage(dest, txt, dir){
@@ -421,15 +450,12 @@ function make_style_field(blade, value) {
         }
     }
 
-    //const height = style_field_height(style);
-
     let ret = "<div class=setting_preset id='style_edit" + blade + "'>";
     ret += "<span>Blade " + blade + "</span><br>";
     ret += "<select class=myselect id=style_select" + blade + " onchange='OnStyleSelect(" + blade + ")'>";
     ret += make_select(style_lines, style);
     ret += "</select>";
 
-    console.log("FLORB: "+style);
     const template_id = named_styles[style].TEMPLATE;
 
     for (let i = 0; i < fields.length; i++) {
@@ -498,7 +524,7 @@ function SaveName() {
 }
 
 function make_name_field(value) {
-    return "<div class=setting><span class=title>name<br><input style='width: 90%' type=text class=myinput id=name_input value='" + value + "' onchange='SaveName()'></span></div>\n";
+    return "<div class=setting><span class=title>Name<br><input style='width: 90%' type=text class=myinput id=name_input value='" + value + "' onchange='SaveName()'></span></div>\n";
 }
 
 function SaveVariation() {
@@ -540,7 +566,7 @@ function UpdateVariation(value) {
 
 function make_variation_field(value) {
     let ret = "<div class=setting>";
-    ret += "<span class=title>variation<br><input type=range min=0 max=32767 class=slider id=variation_slider value='" + value + "' onchange='SaveVariation()'><br>";
+    ret += "<span class=title>Variation<br><input type=range min=0 max=32767 class=slider id=variation_slider value='" + value + "' onchange='SaveVariation()'><br>";
     ret += "<input class=myinput2 type='button' id=variation_decrease value='-' onclick='UpdateVariation(-1)' />";
     ret += "<input class=myinput type='number' id=variation_field onchange='SetVariation()' value=" + value + " />";
     ret += "<input class=myinput2 type='button' id=variation_increase value='+' onclick='UpdateVariation(1)' />";
@@ -559,7 +585,7 @@ function SaveFont() {
 }
 
 function make_font_field(value) {
-    let ret = "<div class=setting><span class=title>font<br><select class=myselect id=font_select name=font_select onchange='SaveFont()'>";
+    let ret = "<div class=setting><span class=title>Font<br><select class=myselect id=font_select name=font_select onchange='SaveFont()'>";
     ret += make_select(font_lines, value);
     ret += "</select></span></div>\n";
     return ret;
@@ -576,7 +602,7 @@ function SaveTrack() {
 }
 
 function make_track_field(value) {
-    let ret = "<div class=setting><span class=title>track<br><select class=myselect id=track_select onchange='SaveTrack()'>";
+    let ret = "<div class=setting><span class=title>Track<br><select class=myselect id=track_select onchange='SaveTrack()'>";
     ret += make_select(track_lines, value);
     ret += "</select></span></div>\n";
     return ret;
@@ -719,19 +745,12 @@ async function UpdateSlider(cmd, slider, label, fn) {
     const label_tag = FIND(label);
 
     let value = slider_tag.value;
-    label_tag.innerHTML = value;
+    label_tag.innerHTML = value + "%";
 
     if (updating_sliders[slider]) return;
 
     updating_sliders[slider] = true;
-
-    while (true) {
-        await Send(cmd + " " + (fn ? fn(value) : value));
-        const old = value;
-        value = label_tag.innerHTML;
-
-        if (old === value) break;
-    }
+    await Send(cmd + " " + (fn ? fn(value) : value));
     updating_sliders[slider] = false;
 }
 
@@ -918,9 +937,12 @@ function UpdatePresets() {
 
 async function generateBoolSetting(base_cmd, variable, label) {
     const value = await Send("get_" + base_cmd + " " + variable);
+
     if (value.startsWith("Whut?")) return "";
     if (value.trim() === "") return "";
+
     const checked = parseFloat(value) > 0.5 ? "checked" : "";
+
     return "<div class=setting><span class=title>" + label +
         ": <input type=checkbox class=mycheck id=bool_setting_" + base_cmd + "_" + variable + " " + checked +
         " onchange=\"SaveBoolSetting('" + base_cmd + "','" + variable + "')\"></span></div>\n";
@@ -1056,8 +1078,6 @@ async function Run2() {
     for (let l = 0; l < lines.length; l++) {
         const tmp = lines[l].split("=");
 
-        console.log(tmp);
-
         if (tmp.length > 1) {
             if (tmp[0] === "FONT") {
                 if (preset) presets.push(preset);
@@ -1067,9 +1087,7 @@ async function Run2() {
         }
     }
 
-    if (preset && Object.keys(preset).length > 0)
-        presets.push(preset);
-    // console.log(presets);
+    if (preset && Object.keys(preset).length > 0) presets.push(preset);
 
     UpdatePresets();
     DoRunLoop()
@@ -1101,6 +1119,8 @@ async function RunSerial() {
 
     getVersion();
 
+    FIND("topbutton").style.visibility = 'visible';
+
 
     // Listen to data coming from the serial device.
     while (true) {
@@ -1111,10 +1131,12 @@ async function RunSerial() {
             break;
         }
         // value is a string.
-        console.log(value);
+        //console.log(value);
         OnSerialData(value);
     }
 }
+
+
 
 async function RunUSB() {
     FIND('EMSG').innerHTML = '';
@@ -1316,10 +1338,10 @@ async function Loop() {
                     if (args[j]) {
                         const last_word = args[j].split(" ").pop();
                         if (last_word === "color" && default_arguments[0] === "INT") {
-                            console.log("WARNING: " + style_lines[i] + " argument " + i + " desc says color, but is int.");
+                            console.warn("WARNING: " + style_lines[i] + " argument " + i + " desc says color, but is int.");
                         }
                         if (last_word === "time" && default_arguments[0] === "COLOR") {
-                            console.log("WARNING: " + style_lines[i] + " argument " + i + " desc says time, but is color.");
+                            console.warn("WARNING: " + style_lines[i] + " argument " + i + " desc says time, but is color.");
                         }
                     }
                 }
@@ -1474,7 +1496,7 @@ class LineBreakTransformer {
         // Append new chunks to existing chunks.
         this.chunks += chunk;
         // For each line breaks in chunks, send the parsed lines out.
-        const lines = this.chunks.split("\n");
+        const lines = this.chunks.split(/\n|\r\n/);
         this.chunks = lines.pop();
         lines.forEach((line) => controller.enqueue(line));
     }

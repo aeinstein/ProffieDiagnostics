@@ -25,13 +25,13 @@
 	</div>
 
 	<div style="min-width: 220px; font-size: 13px">
-		Manufacturer: <span id="txtManufact"></span><br>
+		Manufacturer: <span id="txtManufact">connect USB</span><br>
 		Product: <span id="txtProduct"></span><br>
 		Serial: <span id="txtSerial"></span>
 	</div>
 
 	<div style="min-width: 220px; font-size: 13px">
-		Version: <span id="txtVersion"></span><br>
+		Version: <span id="txtVersion">connect Serial</span><br>
 		Config: <span id="txtConfig"></span><br>
 		Props: <span id="txtProp"></span><br>
 		Num. Buttons: <span id="txtButtons"></span><br>
@@ -51,7 +51,7 @@
 	</div>
 
 	<div id="containerEdit" class=scrollable style='display:none;'>
-		<div class=header><span class=title>Edit</span></div>
+		<div class=header><span class=title>Edit Preset</span></div>
 		<span id=contentEdit class=content>Getting options...</span>
 	</div>
 
@@ -109,21 +109,22 @@
 		</div>
 
 		<div class="scrollable" style="height: 50%">
-			<div class=header><span class=title>Serial Commands</span></div>
+			<div class=header>
+				<span class=title>Serial Commands</span>
+				<button id="topbutton" onclick='getTop()'>TOP</button>
+			</div>
 			<div class="content">
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>scanid</span></div>
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>id</span></div>
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>dacbuf</span></div>
-				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>list_named_style</span></div>
+				<!--
+				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>list_named_styles</span></div>-->
 
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>malloc</span></div>
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>whatison</span></div>
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>volumes</span></div>
 
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>get_ble_config</span></div>
-
-
-				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>top</span></div>
 
 				<div class=control><span class=title onclick='SendSerial(this.innerHTML);'>reset</span></div>
 
@@ -167,6 +168,9 @@
 		<div id="contentSerial" class="console_content"></div>
 	</div>
 </footer>
+
+<div id="top"></div>
+
 </body>
 <script src="script2.js"></script>
 </html>
