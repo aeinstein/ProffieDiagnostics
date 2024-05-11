@@ -1,5 +1,6 @@
-let serviceUuid = '713d0000-389c-f637-b1d7-91b361ae7678';
 
+
+let serviceUuid = '713d0000-389c-f637-b1d7-91b361ae7678';
 
 let usbProductId = 0x6668;
 let usbVendorId = 0x1209;
@@ -16,6 +17,13 @@ let status;
 let usb_device;
 let endpointOut;
 let endpointIn;
+let topPID = -1;
+
+// Serial vars
+let serial_port;
+let versionLoaded = false;
+let topCalled = false;
+let processes = {};
 
 let send_buf = [];
 let current_packet;
@@ -138,7 +146,7 @@ function OnData(data) {
         ret = ret.split("\r").join("");
 
         console.log('> ' + ret);
-        addMessage(ret, "in");
+        addMessage("contentUSB", ret, "in");
 
         if (callback_queue.length) {
             last_callback = Date.now();
@@ -148,25 +156,114 @@ function OnData(data) {
     }
 }
 
-function addMessage(txt, dir){
-    const console = FIND("ConsoleContent");
+function OnSerialData(data){
+    console.log('> ' + data);
+    addMessage("contentSerial", data + "\n", "in");
+
+
+    if(!versionLoaded) {
+        let matches = data.match("v([0-9])*\.([0-9]*)");
+
+        if(matches){
+            let version = matches[1] + "." + matches[2];
+            FIND("txtVersion").innerHTML = version;
+        }
+
+        if(data.indexOf(": ") > 0) {
+            let d = data.split(": ");
+            switch(d[0]){
+            case "prop":
+                FIND("txtProp").innerHTML = d[1];
+                break;
+
+            case "buttons":
+                FIND("txtButtons").innerHTML = d[1];
+                break;
+
+            case "installed":
+                FIND("txtInstalled").innerHTML = d[1];
+                versionLoaded = true;
+                break;
+            }
+        }
+
+        if(data.startsWith("config/")){
+            FIND("txtConfig").innerHTML = data;
+        }
+    }
+
+    if(topCalled){
+        if(data.indexOf(": ") > 0) {
+            let d = data.split(": ");
+            processes[d[0]] = d[1];
+
+            if(d[0] === "MonitorHelper loop") {
+                topCalled = false;
+                FIND("contentTop").innerHTML = displayTop();
+            }
+        }
+    }
+}
+
+function displayTop(){
+    let ret = "<table>";
+
+    for (const property in processes) {
+        ret += "<tr>";
+        ret += "<td>" + property + "</td>";
+        ret += "<td>" + processes[property] + "</td>";
+        ret += "</tr>";
+    }
+
+    ret += "</table>";
+
+    return ret;
+}
+
+function openTop(){
+    FIND("top").style.visibility = "visible";
+
+    topPID = window.setInterval(() => {
+        topCalled = true;
+        SendSerial("top");
+    }, 5000);
+
+    topCalled = true;
+    SendSerial("top");
+}
+
+
+
+function closeTop(){
+    if(topPID >= 0) window.clearInterval(topPID);
+    topPID = -1;
+    FIND("top").style.visibility = "hidden";
+}
+
+function getVersion(){
+    versionLoaded = false;
+    SendSerial("version");
+}
+
+function addMessage(dest, txt, dir){
+    const console = FIND(dest);
 
     while(console.childNodes.length > 200) {
         console.firstChild.remove();
     }
 
     switch(dir){
-    case "in":
-        console.innerHTML += "<span class='receive'>" + txt + "</span>";
-        break;
+        case "in":
+            console.innerHTML += "<span class='receive'>" + txt + "</span>";
+            break;
 
-    case "out":
-        console.innerHTML += "<span class='send'>" + txt + "</span>";
-        break;
+        case "out":
+            console.innerHTML += "<span class='send'>" + txt + "</span>";
+            break;
 
-    default:
-        console.innerHTML += "<span>" + txt + "</span>";
-        break;
+        default:
+            console.innerHTML += "<span>" + txt + "</span>";
+            break;
     }
 
     console.scrollTo(0, console.scrollHeight)
@@ -194,6 +291,18 @@ function RunWatchDog() {
     }
 }
 
+async function SendSerial(cmd) {
+    const textEncoder = new TextEncoderStream();
+    const writableStreamClosed = textEncoder.readable.pipeTo(serial_port.writable);
+
+    const writer = textEncoder.writable.getWriter();
+
+    addMessage("contentSerial", cmd + "\n", "out");
+
+    await writer.write(cmd + "\r\n");
+    await writer.close();
+}
+
 function Send(cmd) {
     let data = new TextEncoder('utf-8').encode(cmd + '\n');
     // console.log(usb_device);
@@ -201,7 +310,7 @@ function Send(cmd) {
     if (usb_device) {
         return new Promise(function (resolve, reject) {
                 console.log("Sending " + cmd);
-                addMessage(cmd + "\n", "out");
+                addMessage("contentUSB", cmd + "\n", "out");
                 if (callback_queue.length === 0) last_callback = Date.now();
                 callback_queue.push([resolve, reject])
                 RunWatchDog();
@@ -357,15 +466,12 @@ function make_style_field(blade, value) {
         }
     }
 
-    //const height = style_field_height(style);
-
-    let ret = "<div class=edit_tall id='style_edit" + blade + "'>";
+    let ret = "<div class=setting_preset id='style_edit" + blade + "'>";
     ret += "<span>Blade " + blade + "</span><br>";
     ret += "<select class=myselect id=style_select" + blade + " onchange='OnStyleSelect(" + blade + ")'>";
     ret += make_select(style_lines, style);
     ret += "</select>";
 
-  console.log("FLORB: "+style);
     const template_id = named_styles[style].TEMPLATE;
 
     for (let i = 0; i < fields.length; i++) {
@@ -434,7 +540,7 @@ function SaveName() {
 }
 
 function make_name_field(value) {
-    return "<div class=edit><span class=title>name<br><input type=text class=myinput id=name_input value='" + value + "' onchange='SaveName()'></span></div>\n";
+    return "<div class=setting><span class=title>Name<br><input style='width: 90%' type=text class=myinput id=name_input value='" + value + "' onchange='SaveName()'></span></div>\n";
 }
 
 function SaveVariation() {
@@ -475,10 +581,10 @@ function UpdateVariation(value) {
 }
 
 function make_variation_field(value) {
-    let ret = "<div class=edit>";
-    ret += "<span class=title>variation<input type=range min=0 max=32767 class=slider id=variation_slider value='" + value + "' onchange='SaveVariation()'>";
+    let ret = "<div class=setting>";
+    ret += "<span class=title>Variation<br><input type=range min=0 max=32767 class=slider id=variation_slider value='" + value + "' onchange='SaveVariation()'><br>";
     ret += "<input class=myinput2 type='button' id=variation_decrease value='-' onclick='UpdateVariation(-1)' />";
-    ret += "<input class=myinput2 type='number' id=variation_field onchange='SetVariation()' value=" + value + " />";
+    ret += "<input class=myinput type='number' id=variation_field onchange='SetVariation()' value=" + value + " />";
     ret += "<input class=myinput2 type='button' id=variation_increase value='+' onclick='UpdateVariation(1)' />";
     ret += "</span></div>\n";
     return ret;
@@ -495,7 +601,7 @@ function SaveFont() {
 }
 
 function make_font_field(value) {
-    let ret = "<div class=edit-select><span class=title>font<br><select class=myselect id=font_select name=font_select onchange='SaveFont()'>";
+    let ret = "<div class=setting><span class=title>Font<br><select class=myselect id=font_select name=font_select onchange='SaveFont()'>";
     ret += make_select(font_lines, value);
     ret += "</select></span></div>\n";
     return ret;
@@ -512,7 +618,7 @@ function SaveTrack() {
 }
 
 function make_track_field(value) {
-    let ret = "<div class=edit-select><span class=title>track<br><select class=myselect id=track_select onchange='SaveTrack()'>";
+    let ret = "<div class=setting><span class=title>Track<br><select class=myselect id=track_select onchange='SaveTrack()'>";
     ret += make_select(track_lines, value);
     ret += "</select></span></div>\n";
     return ret;
@@ -520,18 +626,18 @@ function make_track_field(value) {
 
 function updateEditPane(preset) {
     // TODO: We shouldn't do this part every 5 seconds!
-    let tmp = "<div>";
+    let tmp = "";
     tmp += make_name_field(presets[preset].NAME) + "<br>";
     tmp += make_font_field(presets[preset].FONT) + "<br>";
     tmp += make_track_field(presets[preset].TRACK) + "<br>";
     tmp += make_variation_field(presets[preset].VARIATION);
-    tmp += "</div>";
+    tmp += "";
 
     for (let blade = 1; presets[preset]["STYLE" + blade]; blade++) {
         tmp += make_style_field(blade, presets[preset]["STYLE" + blade]);
     }
 
-    const edit_pane = FIND('edit_pane2');
+    const edit_pane = FIND('contentEdit');
     edit_pane.innerHTML = tmp;
 }
 
@@ -629,7 +735,7 @@ async function DelPreset() {
 }
 
 async function DelConfirm() {
-    var r = confirm("Delete current preset?");
+    const r = confirm("Delete current preset?");
     if (r == true) {
         DelPreset();
     }
@@ -655,19 +761,12 @@ async function UpdateSlider(cmd, slider, label, fn) {
     const label_tag = FIND(label);
 
     let value = slider_tag.value;
-    label_tag.innerHTML = value;
+    label_tag.innerHTML = value + "%";
 
     if (updating_sliders[slider]) return;
 
     updating_sliders[slider] = true;
-
-    while (true) {
-        await Send(cmd + " " + (fn ? fn(value) : value));
-        const old = value;
-        value = label_tag.innerHTML;
-
-        if (old === value) break;
-    }
+    await Send(cmd + " " + (fn ? fn(value) : value));
     updating_sliders[slider] = false;
 }
 
@@ -797,13 +896,13 @@ async function Connect() {
 }
 
 function UpdateMode() {
-    FIND('CTRL').style.display = currentMode === 'normal' ? 'initial' : 'none'
-    FIND('TRACKS').style.display = currentMode === 'normal' ? 'initial' : 'none'
-    FIND('PRESETS').style.display = currentMode !== 'settings' ? 'initial' : 'none'
-    FIND('edit_pane').style.display = currentMode === 'edit' ? 'initial' : 'none';
+    FIND('containerControls').style.display = currentMode === 'normal' ? 'initial' : 'none'
+    FIND('containerTracks').style.display = currentMode === 'normal' ? 'initial' : 'none'
+    FIND('containerPresets').style.display = currentMode !== 'settings' ? 'initial' : 'none'
+    FIND('containerEdit').style.display = currentMode === 'edit' ? 'initial' : 'none';
     FIND('settings_pane').style.display = currentMode === 'settings' ? 'initial' : 'none';
     FIND("editbutton").style.background = currentMode === 'edit' ? '#505080' : '#101040';
-    FIND("settingsbutton").style.background = currentMode === 'settings' ? '#505080' : '#101040';
+    FIND("settingsButton").style.background = currentMode === 'settings' ? '#505080' : '#101040';
     if (currentMode === 'settings') {
         UpdateSettings();
     } else {
@@ -842,10 +941,10 @@ function UpdatePresets() {
     }
     if (currentMode === "edit") {
         preset_string += "<div class=preset onclick='AddPreset()'>";
-        preset_string += "<span class=title2>+</span>";
+        preset_string += "<span class=title>+</span>";
         preset_string += "</div>";
         preset_string += "<div class=preset ondrop='DelPreset()' onclick=DelConfirm()>";
-        preset_string += "<span class=title2>&#x1F5D1;</span>";
+        preset_string += "<span class=title>&#x1F5D1;</span>";
         preset_string += "</div>";
     }
     FIND('presets').innerHTML = preset_string;
@@ -854,10 +953,13 @@ function UpdatePresets() {
 
 async function generateBoolSetting(base_cmd, variable, label) {
     const value = await Send("get_" + base_cmd + " " + variable);
+
     if (value.startsWith("Whut?")) return "";
     if (value.trim() === "") return "";
+
     const checked = parseFloat(value) > 0.5 ? "checked" : "";
-    return "<div class=edit><span class=title>" + label +
+
+    return "<div class=setting><span class=title>" + label +
         ": <input type=checkbox class=mycheck id=bool_setting_" + base_cmd + "_" + variable + " " + checked +
         " onchange=\"SaveBoolSetting('" + base_cmd + "','" + variable + "')\"></span></div>\n";
 }
@@ -872,7 +974,7 @@ async function generateIntSetting(base_cmd, variable, label) {
     if (value.startsWith("Whut?")) return "";
     if (value.trim() === "") return "";
     value = Math.round(parseFloat(value));
-    return "<div class=edit><span class=title>" + label +
+    return "<div class=setting><span class=title>" + label +
         "<br><input type=text class=myinput id=int_setting_" + base_cmd + "_" + variable + " value='" + value + "'" +
         " onchange=\"SaveIntSetting('" + base_cmd + "','" + variable + "')\"></span></div>\n";
 }
@@ -883,18 +985,20 @@ function SaveIntSetting(base_cmd, variable) {
 }
 
 async function UpdateSettings() {
-    FIND("settings_pane2").innerHTML = "...";
+    FIND("contentSettings").innerHTML = "...";
     let html = "";
+
     const dimming = await Send("get_blade_dimming");
+
     if (!dimming.startsWith("Whut?")) {
         const dim_percent = Math.round(Math.pow(parseInt(dimming) / 16384.0, 1.0 / 2.2) * 100);
-        html += "<div class=edit id=brightness_setting><span class=title>Brightness<input type=range min=1 max=100 class=slider style='width:90%' id=brightness_input value='" + dim_percent + "' onchange='SaveBrightness()' oninput='SaveBrightness()'><span id=brightness_number>" + dim_percent + "%</span></span></div>\n";
+        html += "<div class=setting id=brightness_setting><span class=title>Brightness<input type=range min=1 max=100 class=slider style='width:90%' id=brightness_input value='" + dim_percent + "' onchange='SaveBrightness()' oninput='SaveBrightness()'><span id=brightness_number>" + dim_percent + "%</span></span></div>\n";
     }
     let threshold = await Send("get_clash_threshold");
 
     if (!threshold.startsWith("Whut?")) {
         threshold = threshold.trim();
-        html += "<div class=edit id=clash_threshold_setting><span class=title>Clash&nbsp;Threshold<input type=range min=0.5 max=6.0 step=0.05 class=slider style='width:90%' id=clash_threshold_input value='" + threshold + "' onchange='SaveClashThreshold()' oninput='SaveClashThreshold()'><span id=clash_threshold_number>" + threshold + "</span></span></div>\n";
+        html += "<div class=setting id=clash_threshold_setting><span class=title>Clash&nbsp;Threshold<input type=range min=0.5 max=6.0 step=0.05 class=slider style='width:90%' id=clash_threshold_input value='" + threshold + "' onchange='SaveClashThreshold()' oninput='SaveClashThreshold()'><span id=clash_threshold_number>" + threshold + "</span></span></div>\n";
     }
 
     if (max_blade_length) {
@@ -908,7 +1012,7 @@ async function UpdateSettings() {
                 blade_length = max_blade_length;
             }
             if (!blade_length) break;
-            html += "<div class=edit><span class=title>Blade " + blade + " length<br><input type=text class=myinput id=blade_length_input_" + blade + " value='" + blade_length + "' onchange='SaveBladeLength(" + blade + "," + max_blade_length + ")'></span></div>\n";
+            html += "<div class=setting><span class=title>Blade " + blade + " length<br><input type=text class=myinput id=blade_length_input_" + blade + " value='" + blade_length + "' onchange='SaveBladeLength(" + blade + "," + max_blade_length + ")'></span></div>\n";
             blade++;
         }
     }
@@ -927,7 +1031,7 @@ async function UpdateSettings() {
     html += await generateIntSetting("gesture", "clashdetect", "clash detect");
     html += await generateIntSetting("gesture", "maxclash", "max clash strength");
 
-    FIND("settings_pane2").innerHTML = html;
+    FIND("contentSettings").innerHTML = html;
 }
 
 function SaveBladeLength(blade, max_length) {
@@ -974,8 +1078,6 @@ async function Run() {
 }
 
 async function Run2() {
-    FIND('while_connected').style.visibility = 'visible';
-    FIND('while_disconnected').style.visibility = 'hidden';
     FIND('connect_usb').style.visibility = 'hidden';
     FIND('connect_ble').style.visibility = 'hidden';
 
@@ -992,8 +1094,6 @@ async function Run2() {
     for (let l = 0; l < lines.length; l++) {
         const tmp = lines[l].split("=");
 
-        console.log(tmp);
-
         if (tmp.length > 1) {
             if (tmp[0] === "FONT") {
                 if (preset) presets.push(preset);
@@ -1003,18 +1103,57 @@ async function Run2() {
         }
     }
 
-    if (preset && Object.keys(preset).length > 0)
-    presets.push(preset);
-    // console.log(presets);
+    if (preset && Object.keys(preset).length > 0) presets.push(preset);
 
     UpdatePresets();
     DoRunLoop()
 }
 
+async function RunSerial() {
+    FIND('EMSG').innerHTML = '';
+    const ports = await navigator.serial.getPorts();
+
+    if (ports.length === 1) {
+        serial_port = ports[0];
+    } else {
+        serial_port = await navigator.serial.requestPort({'filters': filters});
+    }
+
+    // Wait for the serial port to open.
+    await serial_port.open({ baudRate: 9600 });
+
+
+    const textDecoder = new TextDecoderStream();
+    const readableStreamClosed = serial_port.readable.pipeTo(textDecoder.writable);
+    const reader = textDecoder.readable
+        .pipeThrough(new TransformStream(new LineBreakTransformer()))
+        .getReader();
+
+    FIND('connect_serial').style.visibility = 'hidden';
+
+    getVersion();
+
+    FIND("topbutton").style.visibility = 'visible';
+
+
+    // Listen to data coming from the serial device.
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+            // Allow the serial port to be closed later.
+            reader.releaseLock();
+            break;
+        }
+        // value is a string.
+        //console.log(value);
+        OnSerialData(value);
+    }
+}
+
+
+
 async function RunUSB() {
     FIND('EMSG').innerHTML = '';
-
-
 
     const usb_devices = await navigator.usb.getDevices();
 
@@ -1030,6 +1169,11 @@ async function RunUSB() {
     }
 
     console.log(usb_device);
+
+    FIND("txtManufact").innerHTML = usb_device.manufacturerName;
+    FIND("txtProduct").innerHTML = usb_device.productName;
+    FIND("txtSerial").innerHTML = usb_device.serialNumber;
+
     let interfaceNumber;
 
     endpointOut = -1;
@@ -1076,7 +1220,6 @@ async function RunUSB() {
 
     while (true) {
         const data = await usb_device.transferIn(endpointIn, 64);
-        console.log(data);
         OnData(data.data);
     }
 }
@@ -1111,10 +1254,7 @@ async function HasCmd(cmd) {
 
 async function HasDir(dir) {
     const entries = await GetList("dir " + dir);
-    if (entries.length === 1 && entries[0] === "No such directory.") {
-        return false;
-    }
-    return true
+    return !(entries.length === 1 && entries[0] === "No such directory.");
 }
 
 async function Loop() {
@@ -1150,9 +1290,10 @@ async function Loop() {
         // It will give a short click, but only the first time, after track_list has been populated
         // this is no longer executed. It is annoying if tracks are not shown, when connecting
         // with a inited or track_playing saber. Looks like the app is broken...
-        if (tracks_listed == false) {
+        if (!tracks_listed) {
             let i;
             let l;
+
             tracks_listed = true;
             track_lines = await GetList("list_tracks");
             track_string = "";
@@ -1208,11 +1349,13 @@ async function Loop() {
 
                     if (args[j]) {
                         const last_word = args[j].split(" ").pop();
+
                         if (last_word === "color" && default_arguments[0] === "INT") {
-                            console.log("WARNING: " + style_lines[i] + " argument " + i + " desc says color, but is int.");
+                            console.warn("WARNING: " + style_lines[i] + " argument " + i + " desc says color, but is int.");
                         }
+
                         if (last_word === "time" && default_arguments[0] === "COLOR") {
-                            console.log("WARNING: " + style_lines[i] + " argument " + i + " desc says time, but is color.");
+                            console.warn("WARNING: " + style_lines[i] + " argument " + i + " desc says time, but is color.");
                         }
                     }
                 }
@@ -1239,10 +1382,12 @@ async function Loop() {
                             compatible = false;
                             break;
                         }
+
                         let matching_args = 0;
+
                         for (let k = 0; k < Math.min(arguments.length, tmp.ARGS.length); k++) {
-                            if (arguments[k][0] == "VOID") continue;
-                            if (tmp.ARGS[k][0] == "VOID") continue;
+                            if (arguments[k][0] === "VOID") continue;
+                            if (tmp.ARGS[k][0] === "VOID") continue;
                             if (arguments[k][0] === tmp.ARGS[k][0]) {
                                 matching_args = 0;
                             } else {
@@ -1285,7 +1430,7 @@ async function Loop() {
 
             if (max_blade_length || hasDimming || hasThreshold | hasGetGesture) {
                 console.log("ENABLING SETTINGS");
-                FIND("settingsbutton").style.visibility = 'visible';
+                FIND("settingsButton").style.visibility = 'visible';
             }
         }
 
@@ -1356,5 +1501,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+
 window.addEventListener("load", Init);
+
 

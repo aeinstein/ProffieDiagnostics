@@ -1,10 +1,80 @@
-@font-face {
-    font-family: StarJedi;
-    src: url(Starjedi.ttf);
-    unicode-range: U+0000-0024, U+26-003a, U+3c-5e, U+60-ff;
+body {
+    margin: 0;
+    padding: 5px;
+    font-family: Arial, Sans-Serif, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    color: lightblue;
+    flex-wrap: nowrap;
 }
 
-.header {
+button {
+    margin: 5px;
+    width: 120px;
+}
+
+header, main, footer {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+header {
+    width: 100%;
+    height: 110px;
+    border: 1px solid #373737;
+    padding: 5px;
+}
+
+main, footer {
+    gap: 5px;
+    width: 100%;
+}
+
+main {
+    height: calc(65% - 110px);
+}
+
+footer {
+    height: 35%;
+}
+
+
+.console {
+    height: 100%;
+    width: 100%;
+}
+
+.console_content {
+    white-space: break-spaces;
+    font-family: monospace;
+    height: calc(100% - 35px);
+    overflow-y: auto;
+}
+
+.console_content .receive {
+    color: green;
+}
+
+.console_content .send {
+    color: red;
+}
+
+
+.scrollable {
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid #373737;
+    box-sizing: border-box;
+}
+
+.scrollable .header {
     background: #151521;
     color: #FFFFFF;
     height: 30px;
@@ -14,31 +84,44 @@
     overflow: hidden;
 }
 
-.editbutton, .settingsbutton {
-    font-size: 250%;
-    line-height: 0.8;
-    border-radius: 15px;
-    border: 2px solid #6060aa;
-    background: #101040;
-    color: #FFFFFF;
-    width: 40px;
-    height: 40px;
-    text-align: center;
-    margin: 1px 20px;
-    padding: 8px;
-    text-overflow:clip;
-    overflow: hidden;
-    float: right;
+.scrollable .header .title {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
 }
 
-.preset, .track, .control {
+#containerPresets, #containerTracks {
+    min-width: 310px;
+    width: 310px;
+    flex-grow: 1;
+}
+
+#containerControls {
+    flex-grow: 2;
+}
+
+.content {
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 5px;
+    height: calc(100% - 35px);
+    align-content: flex-start;
+    overflow-y: auto;
+}
+
+.preset, .track, .control, .setting, .setting_preset {
     border: 2px solid #6060aa;
     background: #101040;
     color: #FFFFFF;
     width: 116px;
     height: 23px;
     text-align: center;
-    margin: 5px auto;
     padding: 8px;
     position: relative;
     text-overflow: clip;
@@ -51,69 +134,6 @@
     background: rgb(80, 80, 128);
 }
 
-.big_control {
-    border-radius: 15px 50px;
-    border: 2px solid #6060aa;
-    background: #101040;
-    color: #FFFFFF;
-    width: 500px;
-    height: 200px;
-    text-align: center;
-    margin: 3px auto;
-    padding: 8px;
-    position: relative;
-    text-overflow:clip;
-    overflow: hidden;
-    display: inline-block;
-}
-
-.edit, .edit-select {
-    border: 2px solid #6060aa;
-    background: #101040;
-    color: #FFFFFF;
-    width: 200px;
-    height: 40px;
-    text-align: center;
-    margin: 5px auto;
-    padding: 8px;
-    position: relative;
-    text-overflow: clip;
-    overflow: hidden;
-    display: inline-block;
-}
-
-.edit_tall {
-    border: 2px solid #6060aa;
-    background: #101040;
-    color: #FFFFFF;
-    width: 270px;
-    text-align: center;
-    margin: 5px auto;
-    padding: 8px;
-    position: relative;
-    text-overflow: clip;
-    overflow: hidden;
-    display: inline-block;
-}
-
-.edit_tall table {
-    width: 100%;
-}
-
-.edit_tall table tr td:nth-child(2){
-    text-align: right;
-}
-
-.centered {
-    margin: auto;
-    display:                 flex;
-    display:                 -webkit-flex; /* Safari 8 */
-    flex-wrap:               wrap;
-    -webkit-flex-wrap:       wrap;         /* Safari 8 */
-    justify-content:         center;
-    -webkit-justify-content: center;       /* Safari 8 */
-}
-
 .title {
     margin: 0;
     position: absolute;
@@ -123,28 +143,38 @@
     width: 100%;
 }
 
-.title3 {
-    margin: 0;
-}
-
-.bigtitle {
-    font-size: 350%;
-    line-height: 0.8;
-
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.myselect {
-    background: #20207d;
-    border: 1px solid #595959;
+.button{
+    visibility: hidden;
+    border: 1px solid #6060aa;
+    background: #101040;
     color: #FFFFFF;
-    height: 21px;
-    text-align: center;
-    text-align-last:center;
+    height: 30px;
+    width: 30px;
+    margin: 0;
+    cursor: pointer;
+    position: relative
+}
+
+#closebutton {
+    visibility: inherit;
+}
+
+#editbutton, #closebutton {
+    float: right;
+}
+
+#topbutton {
+    float: right;
+}
+
+.setting {
+    width: 200px;
+    height: 45px;
+}
+
+.setting_preset {
+    width: 250px;
+    height: initial;
 }
 
 .myinput {
@@ -156,131 +186,7 @@
     height: 20px;
 }
 
-.myinput2 {
-    background: #101040;
-    border: 1px solid #595959;
-    color: #FFFFFF;
-    text-align: center;
-    display: inline-block;
-    vertical-align: top;
-    width: 25px;
-}
-
-.mybutton {
-    font-size: 110%;
-    line-height: 0.8;
-    background: #101040;
-    color: #FFFFFF;
-    border: 0;
-    text-align: center;
-}
-
-.mybutton2 {
-    line-height: 0.8;
-    background: #101040;
-    color: #FFFFFF;
-    border: 0;
-    text-align: center;
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.mybutton_large {
-    font-size: 2500%;
-    line-height: 0.8;
-    background: #101040;
-    color: #FFFFFF;
-    border: 0;
-    text-align: center;
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.value {
-    line-height: 1.2;
-    font-family: sans-serif;
-}
-
-.title2 {
-    font-size: 250%;
-    line-height: 0.8;
-
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.appname {
-    font-size: 250%;
-    line-height: 0.8;
-    text-align: center;
-}
-
-.pwbox {
-    font-size: 300%;
-
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.pwinput {
-    font-size: 100%;
-}
-
-body {
-    height: 100%;
-    overflow: hidden;
-    background: black;
-    color: lightblue;
-    margin: 0;
-    font-family: sans-serif;
-}
-
-body, html, .container {
-    height: 100%;
-}
-
-.container, .content {
-    display: flex;
-    height: 100%;
-}
-
-.container {
-    flex-direction: column;
-}
-
-.content, .scrollable {
-    flex: 1;
-}
-
-.edit_scrollable {
-    overflow: auto;
-    height: 100%;
-    width: 66%;
-    border: 1px solid #373737;
-    margin: 5px;
-}
-
-.scrollable {
-    overflow: auto;
-    height: 100%;
-    border: 1px solid #373737;
-    margin: 5px;
-    box-sizing: border-box;
-}
-
-input[type="color"].custom {
+input[type="color"] {
     padding: 0;
     border: none;
     height: 25px;
@@ -288,69 +194,47 @@ input[type="color"].custom {
     vertical-align: middle;
 }
 
-input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
+.content table {
+    width: 100%;
 }
 
-input[type="number" i] {
-    width: 70px;
+.myselect {
+    background: #20207d;
+    border: 1px solid #595959;
+    color: #FFFFFF;
+    height: 21px;
+    text-align: center;
+    text-align-last:center;
 }
 
-.slidecontainer {
-    width: 50%;
+hr {
+    width: 100%;
+    height: 1px;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid;
+}
+
+#top {
     display: inline-block;
+    visibility: hidden;
+    width: 300px;
+    position: absolute;
+    border: 1px solid #595959;
+    background: #20207d;
+    min-height: 200px;
+    left: 30%;
+    top: 30%;
 }
 
-.slider {
-    width: 100%;
-    height: 15px;
-    background: #f0f0f0;
-    outline: none;
-    opacity: 1;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-}
-
-
-.slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #1000ff;
-    cursor: pointer;
-}
-
-#console {
-    height: 30%;
-    border: 1px solid #373737;
-    margin: 5px;
-    box-sizing: border-box;
-}
-
-#ConsoleContent {
-    overflow-y: scroll;
-    overflow-x: clip;
-    font-family: monospace;
-    white-space: break-spaces;
-    height: calc(100% - 50px);
+#top table {
+    font-size: 10px;
     width: 100%;
 }
-
-#ConsoleContent .receive {
-    color: green;
+#top table tr td:nth-child(2) {
+    text-align: right;
 }
 
-#ConsoleContent .send {
-    color: red;
-}
 
-#cmdLine {
-
-}
-
-#volume {
-    width: 20%;
-}
