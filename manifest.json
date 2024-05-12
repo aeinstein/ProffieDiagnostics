@@ -1,13 +1,32 @@
 {
-  "name": "TeensySaber Remote",
-  "short_name": "TeensySaber Remote",
+  "name": "Proffie Diagnostics",
+  "short_name": "Proffie Diagnostics",
+
   "icons": [{
     "src": "icon-256.png",
     "sizes": "256x256",
     "type": "image/png"
   }],
+
   "start_url": "app.html",
+  "display_override": ["fullscreen", "minimal-ui"],
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#2F3BA2"
+  "theme_color": "#2F3BA2",
+
+  "screenshots" : [
+    {
+      "src": "contrib/ProffieWebUSB.PNG",
+      "sizes": "1920x1328",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homescreen of Proffie Diagnostics"
+    },
+    {
+      "src": "contrib/shot1.PNG",
+      "sizes": "1914x1144",
+      "type": "image/png",
+      "label": "Homescreen of Proffie Diagnostics"
+    }
+  ]
 }
