@@ -3,10 +3,11 @@ class BatteryChart extends HTMLElement{
     data = [0];
     value;
     maxvalue = 5;
+    minvalue = 2;
 
     real_max = 5;     // 30MB => 300MBit
 
-    w = 250;
+    w = 300;
     h = 50;
     shadow;
     background = "#FFFFFF";
@@ -37,7 +38,7 @@ class BatteryChart extends HTMLElement{
 
         window.setInterval(()=>{
             this.tick();
-        }, 500);
+        }, 1000);
 
         this.value = this.data[this.data.length -1];
     }
@@ -59,25 +60,12 @@ class BatteryChart extends HTMLElement{
 
     setValue(value){
         this.value = value;
-
-        if(value > this.maxvalue) {
-            if(value > this.real_max){
-                this.maxvalue = this.real_max;
-                this.alarm_count++;
-                console.warn("Traffic limit reached: " + this.alarm_count);
-
-            } else {
-                //this.maxvalue = rx_value;
-                this.maxvalue *= 2;
-            }
-
-        }
     }
 
     redraw(){
         this.clear();
 
-        const xFactor = this.h / this.maxvalue;
+        const xFactor = this.h / (this.maxvalue - this.minvalue);
         let mostleft = this.w;
         let local_max = 0;
         let lastvalue;
@@ -89,7 +77,7 @@ class BatteryChart extends HTMLElement{
         this.ctx.beginPath();
 
         for(let i = 0; i < this.data.length; i++) {
-            lastvalue = this.h - (this.data[this.data.length -1 -i] * xFactor);
+            lastvalue = this.h - ((this.data[this.data.length -1 -i] - this.minvalue) * xFactor) ;
 
             if(lastvalue >= 4.1) {
                 this.ctx.strokeStyle = "#00FF00";
@@ -110,7 +98,8 @@ class BatteryChart extends HTMLElement{
 
             this.ctx.lineTo(this.w -i, lastvalue);
             mostleft = this.w -i;
-            if(this.data[this.data.length -1 -i] > local_max) local_max = this.data[this.data.length -1 -i];
+            if(this.data[this.data.length -1 -i] > local_max)
+                local_max = this.data[this.data.length -1 -i];
         }
 
         if(this.maxvalue > 1024 && local_max < this.maxvalue /2) this.maxvalue /= 2;
@@ -126,13 +115,34 @@ class BatteryChart extends HTMLElement{
         this.ctx.fillStyle = "#c0c0c0";
         this.ctx.strokeStyle = this.background;
         this.ctx.font = "12px Arial";
-        this.ctx.strokeText(this.maxvalue, 2, 12);
-        this.ctx.fillText(this.maxvalue, 2, 12);
+        this.ctx.strokeText(this.maxvalue + "V", 2, 12);
+        this.ctx.fillText(this.maxvalue + "V", 2, 12);
+
+        this.ctx.strokeText(this.minvalue + "V", 2, this.h -3);
+        this.ctx.fillText(this.minvalue + "V", 2, this.h -3);
     }
 
     clear(){
+        const xFactor = this.h / (this.maxvalue - this.minvalue);
+
         this.ctx.fillStyle = this.background;
+        this.ctx.strokeStyle = "#808080";
+
         this.ctx.fillRect(0, 0, this.w, this.h);
+        this.ctx.moveTo(0, this.h - xFactor * 1);
+        this.ctx.lineTo(this.w, this.h - xFactor * 1);
+
+        this.ctx.moveTo(0, this.h - xFactor * 2);
+        this.ctx.lineTo(this.w, this.h - xFactor * 2);
+
+        this.ctx.moveTo(0, this.h - xFactor * 3);
+        this.ctx.lineTo(this.w, this.h - xFactor * 3);
+
+        //this.ctx.moveTo(0, this.h - xFactor * 4);
+        //this.ctx.lineTo(10, this.h - xFactor * 4);
+
+        this.ctx.stroke();
+
     }
 }
 

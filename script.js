@@ -168,7 +168,7 @@ function OnSerialData(data){
 
     if(data.match("Battery voltage: ")){
         let d = data.split(": ");
-        batteryMonitor.setValue(d[1], 0);
+        batteryMonitor.setValue(d[1]);
     }
 
     if(!versionLoaded) {
