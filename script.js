@@ -43,6 +43,11 @@ let track_string = "";
 let tracks_listed = false;
 let watchdog_running = false;
 let arg_storage = {};
+let batteryMonitor = FIND("batteryChart");
+
+batteryMonitor.setAttribute("width", "190");
+batteryMonitor.setAttribute("height", "50");
+batteryMonitor.setAttribute("background", "#202020");
 
 let updating_sliders = {}
 
@@ -160,6 +165,11 @@ function OnSerialData(data){
     console.log('> ' + data);
     addMessage("contentSerial", data + "\n", "in");
 
+
+    if(data.match("Battery voltage: ")){
+        let d = data.split(": ");
+        batteryMonitor.setValue(d[1], 0);
+    }
 
     if(!versionLoaded) {
         let matches = data.match("v([0-9])*\.([0-9]*)");

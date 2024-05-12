@@ -237,4 +237,12 @@ hr {
     text-align: right;
 }
 
+tm-chart {
+    height: 200px;
+}
+
+tm-chart #container {
+    width: 300px;
+}
+
 

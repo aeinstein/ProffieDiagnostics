@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<title>ProffieOS Diagnostics Tool</title>
 	<script src="src/classes/LineBreakTransformer.js"></script>
+	<script type="text/javascript" src="src/classes/chart.js"></script>
 </head>
 <body>
 <header>
@@ -22,7 +23,8 @@
 
 	<div>
 		Volume: <input id=volume type=range min=0 max=2000 class="slider" oninput='UpdateVolume();' onchange='UpdateVolume();'><span id=volume_label>VOL</span><br>
-		Battery: <span id=voltage>---</span> volts.
+		Battery: <span id=voltage>---</span> volts.<br>
+		<tm-batterychart id="batteryChart" background="#202020" width="250" height="50"></tm-batterychart>
 	</div>
 
 	<div style="min-width: 220px; font-size: 13px">
