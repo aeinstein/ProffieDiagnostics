@@ -2,7 +2,7 @@
 # Proffieboard Diagnostics
 WebAPP for basic diagnostics of Proffieboards, via WebUSB and WebSerial.
 
-![](/contrib/ProffieWebUSB.PNG)
+![](/contrib/shot1.PNG)
 
 ## This App is -- in progress --
 Please no questions yet, it is IN PROGRESS !!
@@ -14,6 +14,6 @@ Please no questions yet, it is IN PROGRESS !!
 * Console for WebSerial
 
 
-## RaodMap
+## RoadMap
 * Graphical Representation of "monitor fusion"
 * Create and flash new configs
