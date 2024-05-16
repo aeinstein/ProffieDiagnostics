@@ -58,9 +58,9 @@ const dfuse = {};
                 segment.start = startAddress;
                 segment.sectorSize = sectorSize;
                 segment.end = startAddress + sectorSize * sectorCount;
-                segment.readable = (properties & 0x1) != 0;
-                segment.erasable = (properties & 0x2) != 0;
-                segment.writable = (properties & 0x4) != 0;
+                segment.readable = (properties & 0x1) !== 0;
+                segment.erasable = (properties & 0x2) !== 0;
+                segment.writable = (properties & 0x4) !== 0;
                 segments.push(segment);
 
                 startAddress += sectorSize * sectorCount;
@@ -102,9 +102,9 @@ const dfuse = {};
             throw "Error during special DfuSe command " + commandNames[command] + ":" + error;
         }
 
-        let status = await this.poll_until(state => (state != dfu.dfuDNBUSY));
+        let status = await this.poll_until(state => (state !== dfu.dfuDNBUSY));
 
-        if (status.status != dfu.STATUS_OK) {
+        if (status.status !== dfu.STATUS_OK) {
             throw "Special DfuSe command " + commandName + " failed";
         }
     };
@@ -179,7 +179,7 @@ const dfuse = {};
                     return 0;
                 }
 
-            } else if (segment.start == startAddr + numBytes) {
+            } else if (segment.start === startAddr + numBytes) {
                 // Include a contiguous segment
                 if (segment.readable) {
                     numBytes += (segment.end - segment.start);
@@ -289,7 +289,7 @@ const dfuse = {};
                 throw "Error during DfuSe download: " + error;
             }
 
-            if (dfu_status.status != dfu.STATUS_OK) {
+            if (dfu_status.status !== dfu.STATUS_OK) {
                 throw `DFU DOWNLOAD failed state=${dfu_status.state}, status=${dfu_status.status}`;
             }
 
@@ -312,7 +312,7 @@ const dfuse = {};
         }
 
         try {
-            await this.poll_until(state => (state == dfu.dfuMANIFEST));
+            await this.poll_until(state => (state === dfu.dfuMANIFEST));
 
         } catch (error) {
             this.logError(error);
@@ -333,7 +333,7 @@ const dfuse = {};
         this.logInfo(`Reading up to 0x${max_size.toString(16)} bytes starting at 0x${startAddress.toString(16)}`);
         let state = await this.getState();
 
-        if (state != dfu.dfuIDLE) {
+        if (state !== dfu.dfuIDLE) {
             await this.abortToIdle();
         }
 

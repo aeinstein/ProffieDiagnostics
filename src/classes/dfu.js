@@ -162,7 +162,7 @@ const dfu = {};
         }
 
         // Read enough for bLength
-        var result = await this.device_.controlTransferIn(request_setup, 1);
+        let result = await this.device_.controlTransferIn(request_setup, 1);
 
         if (result.status === "ok") {
             // Retrieve the full descriptor
@@ -200,7 +200,7 @@ const dfu = {};
 
             // Retrieve string indices for interface names
             for (let desc of configDesc.descriptors) {
-                if (desc.bDescriptorType == DT_INTERFACE) {
+                if (desc.bDescriptorType === DT_INTERFACE) {
                     if (!(desc.bInterfaceNumber in configs[configValue])) {
                         configs[configValue][desc.bInterfaceNumber] = {};
                     }
@@ -505,11 +505,11 @@ const dfu = {};
     dfu.Device.prototype.abortToIdle = async function() {
         await this.abort();
         let state = await this.getState();
-        if (state == dfu.dfuERROR) {
+        if (state === dfu.dfuERROR) {
             await this.clearStatus();
             state = await this.getState();
         }
-        if (state != dfu.dfuIDLE) {
+        if (state !== dfu.dfuIDLE) {
             throw "Failed to return to idle state after abort: state " + state.state;
         }
     };
@@ -560,7 +560,7 @@ const dfu = {};
             });
         }
 
-        while (!state_predicate(dfu_status.state) && dfu_status.state != dfu.dfuERROR) {
+        while (!state_predicate(dfu_status.state) && dfu_status.state !== dfu.dfuERROR) {
             await async_sleep(dfu_status.pollTimeout);
             dfu_status = await this.getStatus();
         }
@@ -569,7 +569,7 @@ const dfu = {};
     };
 
     dfu.Device.prototype.poll_until_idle = function(idle_state) {
-        return this.poll_until(state => (state == idle_state));
+        return this.poll_until(state => (state === idle_state));
     };
 
     dfu.Device.prototype.do_download = async function(xfer_size, data, manifestationTolerant) {
@@ -596,7 +596,7 @@ const dfu = {};
                 throw "Error during DFU download: " + error;
             }
 
-            if (dfu_status.status != dfu.STATUS_OK) {
+            if (dfu_status.status !== dfu.STATUS_OK) {
                 throw `DFU DOWNLOAD failed state=${dfu_status.state}, status=${dfu_status.status}`;
             }
 
@@ -622,11 +622,11 @@ const dfu = {};
             try {
                 // Wait until it returns to idle.
                 // If it's not really manifestation tolerant, it might transition to MANIFEST_WAIT_RESET
-                dfu_status = await this.poll_until(state => (state == dfu.dfuIDLE || state == dfu.dfuMANIFEST_WAIT_RESET));
-                if (dfu_status.state == dfu.dfuMANIFEST_WAIT_RESET) {
+                dfu_status = await this.poll_until(state => (state === dfu.dfuIDLE || state === dfu.dfuMANIFEST_WAIT_RESET));
+                if (dfu_status.state === dfu.dfuMANIFEST_WAIT_RESET) {
                     this.logDebug("Device transitioned to MANIFEST_WAIT_RESET even though it is manifestation tolerant");
                 }
-                if (dfu_status.status != dfu.STATUS_OK) {
+                if (dfu_status.status !== dfu.STATUS_OK) {
                     throw `DFU MANIFEST failed state=${dfu_status.state}, status=${dfu_status.status}`;
                 }
             } catch (error) {
@@ -660,7 +660,7 @@ const dfu = {};
             }
         }
 
-        return;
+
     };
 
 })();

@@ -105,7 +105,7 @@ let device = null;
                 let funcDesc = null;
                 let configValue = device.settings.configuration.configurationValue;
 
-                if (configDesc.bConfigurationValue == configValue) {
+                if (configDesc.bConfigurationValue === configValue) {
                     for (let desc of configDesc.descriptors) {
                         if (desc.bDescriptorType === 0x21 && desc.hasOwnProperty("bcdDFUVersion")) {
                             funcDesc = desc;
@@ -116,10 +116,10 @@ let device = null;
 
                 if (funcDesc) {
                     return {
-                        WillDetach:            ((funcDesc.bmAttributes & 0x08) != 0),
-                        ManifestationTolerant: ((funcDesc.bmAttributes & 0x04) != 0),
-                        CanUpload:             ((funcDesc.bmAttributes & 0x02) != 0),
-                        CanDnload:             ((funcDesc.bmAttributes & 0x01) != 0),
+                        WillDetach:            ((funcDesc.bmAttributes & 0x08) !== 0),
+                        ManifestationTolerant: ((funcDesc.bmAttributes & 0x04) !== 0),
+                        CanUpload:             ((funcDesc.bmAttributes & 0x02) !== 0),
+                        CanDnload:             ((funcDesc.bmAttributes & 0x01) !== 0),
                         TransferSize:          funcDesc.wTransferSize,
                         DetachTimeOut:         funcDesc.wDetachTimeOut,
                         DFUVersion:            funcDesc.bcdDFUVersion
@@ -291,7 +291,7 @@ let device = null;
                     }
                     reject(request.status);
                 }
-                request.open("POST", "https://fredrik.hubbe.net/lightsaber/compile.pike");
+                request.open("POST", "https://vdev.cust.itnox.de/proffie/compile");
                 request.responseType = "arraybuffer";
                 request.send("config="+escape(document.querySelector("#configuration").value));
             });
@@ -334,6 +334,7 @@ let device = null;
             }
 
             let memorySummary = "";
+
             if (desc && Object.keys(desc).length > 0) {
                 device.properties = desc;
 
@@ -342,9 +343,7 @@ let device = null;
                 dfuDisplay.textContent += "\n" + info;
                 transferSize = desc.TransferSize;
 
-                if (desc.CanDnload) {
-                    manifestationTolerant = desc.ManifestationTolerant;
-                }
+                if (desc.CanDnload) manifestationTolerant = desc.ManifestationTolerant;
 
                 if (device.settings.alternate.interfaceProtocol === 0x02) {
                     if (!desc.CanDnload) {
@@ -354,12 +353,16 @@ let device = null;
 
                 if (desc.DFUVersion === 0x011a && device.settings.alternate.interfaceProtocol === 0x02) {
                     device = new dfuse.Device(device.device_, device.settings);
+
                     if (device.memoryInfo) {
                         let totalSize = 0;
+
                         for (let segment of device.memoryInfo.segments) {
                             totalSize += segment.end - segment.start;
                         }
+
                         memorySummary = `Selected memory region: ${device.memoryInfo.name} (${niceSize(totalSize)})`;
+
                         for (let segment of device.memoryInfo.segments) {
                             let properties = [];
 
@@ -416,7 +419,7 @@ let device = null;
             if (device && firmwareFile != null) {
                 try {
                     let status = await device.getStatus();
-                    if (status.state == dfu.dfuERROR) {
+                    if (status.state === dfu.dfuERROR) {
                         await device.clearStatus();
                     }
                 } catch (error) {
@@ -550,7 +553,7 @@ let device = null;
 
                 try {
                     let status = await device.getStatus();
-                    if (status.state == dfu.dfuERROR) {
+                    if (status.state === dfu.dfuERROR) {
                         await device.clearStatus();
                     }
                 } catch (error) {
