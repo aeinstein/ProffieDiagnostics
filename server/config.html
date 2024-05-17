@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="script.js"></script>
+</head>
+<style>
+	body {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        align-items: flex-start;
+        justify-content: space-evenly;
+	}
+
+	.inner {
+		width: 100%;
+		height: 100%;
+        font-family: monospace;
+        font-size: 11px;
+        tab-size: 10px;
+	}
+
+	.container {
+
+	}
+
+	.details {
+		display: none;
+	}
+
+	.modal {
+        border: 1px solid silver;
+        box-shadow: 0 0 15px black;
+        position: fixed;
+        background-color: #373737;
+        top: 50%;
+        transform: translate(0px, -50%);
+        padding: 5px;
+		color: white;
+		font-family: arial, sans-serif;
+	}
+
+
+    .modal table tr td:nth-child(2) {
+		padding-right: 5px;
+		width: 50px;
+		text-align: right;
+	}
+
+    #MaxVolts, #MaxAmps, #P2Amps, #P2Volts, #Resistor, #Color  {
+		width: 50px;
+	}
+
+	.pin, .led {
+		width: 70px;
+		text-align: center;
+	}
+
+    .pin {
+		width: 50px;
+	}
+
+
+</style>
+<body>
+
+<div>
+	<div id="cntTop" class="container"><textarea id="top" class="inner"></textarea></div>
+	<br>
+	<div id="cntBlades" class="container">
+		<legend>Blades</legend>
+		<button style="float: right" onclick="addBlade()">Neues Blade</button>
+
+		<select id="blade_id">
+			<option value="0"></option>
+		</select>
+
+		<table>
+			<thead>
+				<tr>
+					<td>BladeID</td>
+					<td>Class1</td>
+					<td>Class2</td>
+					<td>Class3</td>
+					<td>presets</td>
+				</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td><input id="" type="text" value=""></td>
+				<td><select>
+					<option>SimpleBladePtr</option>
+					<option>WS281XBladePtr</option>
+					<option>SubBlade</option>
+					<option>SubBladeReverse</option>
+					<option>SubBladeWithStride</option>
+					<option>DimBlade</option>
+				</select></td>
+				<td></td>
+			</tr>
+			</tbody>
+		</table>
+
+		</div>
+	<div class="container"><textarea id="buttons" class="inner"></textarea></div>
+</div>
+
+<div>
+	<div class="container"><textarea id="styles" class="inner"></textarea></div>
+	<div class="container"><textarea id="presets" class="inner"></textarea></div>
+</div>
+
+
+
+<template id="tmpNewBlade">
+	<select id="newBladeType" onchange="showDetails(window.event)">
+		<option>SimpleBladePtr</option>
+		<option>WS281XBladePtr</option>
+	</select>
+	<br>
+
+	<div class="details" id="detailsSimpleBlade">
+		<button id="btnNewLED" onclick="addNewLED()">Neue LED</button>
+		<div id="ledArray">
+			<table>
+				<tr>
+					<td>
+						<select class="led" id="led1"><option value="">NoLed</option></select>
+					</td>
+					<td>
+						<select class="led" id="led2"><option value="">NoLed</option></select>
+					</td>
+					<td>
+						<select class="led" id="led3"><option value="">NoLed</option></select>
+					</td>
+					<td>
+						<select class="led" id="led4"><option value="">NoLed</option></select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input class="pin" type="number" id="pin1">
+					</td>
+					<td>
+						<input class="pin" type="number" id="pin2">
+					</td>
+					<td>
+						<input class="pin" type="number" id="pin3">
+					</td>
+					<td>
+						<input class="pin" type="number" id="pin4">
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<div class="details" id="detailsWS281XBladePtr">
+		<table>
+			<tr>
+				<td><label for="numLeds">Number of Leds</label></td>
+				<td><input type="number" id="numLeds" value="144"></td>
+			</tr>
+			<tr>
+				<td><label for="dataPin">Data Pin</label></td>
+				<td>
+					<select id="dataPin">
+						<option>bladePin</option>
+						<option>bladePin2</option>
+						<option>bladePin3</option>
+						<option>bladePin4</option>
+						<option>bladePin5</option>
+						<option>bladePin6</option>
+						<option>bladePin7</option>
+					</select>
+
+				</td>
+			</tr>
+			<tr>
+				<td><label for="byte_order">Byte Order</label></td>
+				<td><select id="byte_order">
+					<option>Color8::BGR</option>
+					<option>Color8::BRG</option>
+					<option>Color8::GBR</option>
+					<option>Color8::GRB</option>
+					<option>Color8::RBG</option>
+					<option>Color8::RGB</option>
+					<option>Color8::BGRW</option>
+					<option>Color8::BRGW</option>
+					<option>Color8::GBRW</option>
+					<option>Color8::GRBW</option>
+					<option>Color8::RBGW</option>
+					<option>Color8::RGBW</option>
+					<option>Color8::WBGR</option>
+					<option>Color8::WBRG</option>
+					<option>Color8::WGBR</option>
+					<option>Color8::WGRB</option>
+					<option>Color8::WRBG</option>
+					<option>Color8::WRGB</option>
+					<option>Color8::BGRw</option>
+					<option>Color8::BRGw</option>
+					<option>Color8::GBRw</option>
+					<option>Color8::GRBw</option>
+					<option>Color8::RBGw</option>
+					<option>Color8::RGBw</option>
+					<option>Color8::wBGR</option>
+					<option>Color8::wBRG</option>
+					<option>Color8::wGBR</option>
+					<option>Color8::wGRB</option>
+					<option>Color8::wRBG</option>
+					<option>Color8::wRGB</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td><label for="powerpins">PowerPins</label></td>
+				<td>
+					<select id="powerpins" multiple>
+						<option>bladePowerPin1</option>
+						<option>bladePowerPin2</option>
+						<option>bladePowerPin3</option>
+						<option>bladePowerPin4</option>
+						<option>bladePowerPin5</option>
+						<option>bladePowerPin6</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>PinClass</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><label for="frequency">Frequency</label></td>
+				<td><input type="number" id="frequency" placeholder="800000"></td>
+			</tr>
+			<tr>
+				<td><label for="reset_us">Reset yS</label></td>
+				<td><input type="number" id="reset_us" placeholder="300"></td>
+			</tr>
+			<tr>
+				<td><label for="t1h">Time High</label></td>
+				<td><input type="number" id="t1h" placeholder="394"></td>
+			</tr>
+			<tr>
+				<td><label for="t0l">Time Low</label></td>
+				<td><input type="number" id="t0l" placeholder="894"></td>
+			</tr>
+		</table>
+	</div>
+
+	<table style="width: 100%">
+		<tr>
+			<td><button onclick="hideTemplate()">Cancel</button></td>
+			<td style="text-align: right"><button onclick="saveBlade()">Create</button></td>
+		</tr>
+	</table>
+</template>
+
+
+<template id="tmpNewLED">
+	<table>
+		<tr>
+			<td colspan="2"><input type="text" id="LedName" placeholder="Name"></td>
+		</tr>
+		<tr>
+			<td colspan="2"><hr></td>
+		</tr>
+		<tr>
+			<td>MaxAmps</td>
+			<td><input type="text" id="MaxAmps"></td>
+		</tr>
+		<tr>
+			<td>MaxVolts</td>
+			<td><input type="text" id="MaxVolts"></td>
+		</tr>
+		<tr>
+			<td>P2Amps</td>
+			<td><input type="text" id="P2Amps"></td>
+		</tr>
+		<tr>
+			<td>P2Volts</td>
+			<td><input type="text" id="P2Volts"></td>
+		</tr>
+		<tr>
+			<td>Resistor</td>
+			<td><input type="text" id="Resistor"></td>
+		</tr>
+		<tr>
+			<td>Color</td>
+			<td><input type="color" id="Color"></td>
+		</tr>
+		<tr>
+			<td>
+				<button onclick="hideTemplate()">Cancel</button>
+			</td>
+			<td style="text-align: right">
+				<button onclick="saveLed()">Create</button>
+			</td>
+		</tr>
+	</table>
+</template>
+
+
+<script>
+
+
+
+</script>
+</body>
+</html>
