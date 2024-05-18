@@ -4,6 +4,8 @@
 	<meta charset="UTF-8">
 	<title>Title</title>
 	<script src="script.js"></script>
+	<script src="SimpleBladePtr.js"></script>
+	<script src="blades.js"></script>
 </head>
 <style>
 	body {
@@ -24,7 +26,8 @@
 	}
 
 	.container {
-
+        border: 1px solid black;
+		padding: 5px;
 	}
 
 	.details {
@@ -63,48 +66,68 @@
 		width: 50px;
 	}
 
+	#bladeConfig {
+		width: 100%;
+	}
+
+	textarea {
+        box-sizing: border-box;
+	}
+
 
 </style>
 <body>
 
 <div>
-	<div id="cntTop" class="container"><textarea id="top" class="inner"></textarea></div>
-	<br>
 	<div id="cntBlades" class="container">
-		<legend>Blades</legend>
-		<button style="float: right" onclick="addBlade()">Neues Blade</button>
+		<legend>Blade Configs</legend>
+		<hr>
+		<button style="float: right" onclick="newBladeDefinition()">New blade definition</button>
+		<button style="float: right" onclick="addBlade()">Add blade</button>
+		<button style="float: right" onclick="newBladeID()">New bladeID</button>
 
-		<select id="blade_id">
-			<option value="0"></option>
+		<label for="blade_id">BladeID</label>
+		<select id="blade_id" onchange="refreshBlades()">
+			<option value="0">-- All -- (0)</option>
 		</select>
 
+		Number of blades
+		<input style="width: 40px" type="number" id="num_blades" readonly>
+		<hr>
+
+		<button style="float:right;" onclick="clrBlades()">clear blades</button>
+		<button style="float:right;" onclick="clrBladeID()">clear BladeID</button>
 		<table>
-			<thead>
-				<tr>
-					<td>BladeID</td>
-					<td>Class1</td>
-					<td>Class2</td>
-					<td>Class3</td>
-					<td>presets</td>
-				</tr>
-			</thead>
-			<tbody>
 			<tr>
-				<td><input id="" type="text" value=""></td>
-				<td><select>
-					<option>SimpleBladePtr</option>
-					<option>WS281XBladePtr</option>
-					<option>SubBlade</option>
-					<option>SubBladeReverse</option>
-					<option>SubBladeWithStride</option>
-					<option>DimBlade</option>
+				<td rowspan="2">
+					<select style="min-width: 200px" id="currentBlades" multiple></select>
+				</td>
+				<td>Presets</td>
+				<td><select id="preset">
+					<option>presets</option>
 				</select></td>
-				<td></td>
 			</tr>
-			</tbody>
+
+			<tr>
+				<td>Save Folder</td>
+				<td><input type="text" id="saveDir"></td>
+			</tr>
 		</table>
 
-		</div>
+
+		<hr>
+		<textarea id="bladeConfig" style="min-width: 600px; min-height: 200px"></textarea>
+	</div>
+	<br>
+
+	<div id="lstBladeDefinitions">
+
+	</div>
+
+
+
+
+
 	<div class="container"><textarea id="buttons" class="inner"></textarea></div>
 </div>
 
@@ -113,13 +136,44 @@
 	<div class="container"><textarea id="presets" class="inner"></textarea></div>
 </div>
 
+<template id="tmpNewBladeID">
+	New BladeID<br>
+	<table>
+		<tr>
+			<td>BladeID (Resisitor)</td>
+			<td><input type="number" id="newBladeID" value="0"></td>
+		</tr>
+		<tr>
+			<td><button onclick="hideTemplate()">Cancel</button></td>
+			<td style="text-align: right"><button onclick="saveNewBladeID()">Create</button></td>
+		</tr>
+	</table>
+</template>
 
+<template id="tmpAddBlade">
+	<br>
+	<table style="width: 100%">
+		<tr>
+			<td>Blade</td>
+			<td><select id="bladeDefinition"></select></td>
+		</tr>
+		<tr>
+			<td><button onclick="hideTemplate()">Cancel</button></td>
+			<td style="text-align: right"><button onclick="saveAddBlade()">Create</button></td>
+		</tr>
+	</table>
+</template>
 
-<template id="tmpNewBlade">
+<template id="tmpNewBladeDefinition">
 	<select id="newBladeType" onchange="showDetails(window.event)">
 		<option>SimpleBladePtr</option>
 		<option>WS281XBladePtr</option>
+		<option>SubBlade</option>
+		<option>DimBlade</option>
 	</select>
+	<br>
+
+	<input type="text" id="bladeName" placeholder="Name">
 	<br>
 
 	<div class="details" id="detailsSimpleBlade">
@@ -161,6 +215,9 @@
 	<div class="details" id="detailsWS281XBladePtr">
 		<table>
 			<tr>
+				<td colspan="2"><hr></td>
+			</tr>
+			<tr>
 				<td><label for="numLeds">Number of Leds</label></td>
 				<td><input type="number" id="numLeds" value="144"></td>
 			</tr>
@@ -176,7 +233,6 @@
 						<option>bladePin6</option>
 						<option>bladePin7</option>
 					</select>
-
 				</td>
 			</tr>
 			<tr>
@@ -229,7 +285,7 @@
 			</tr>
 			<tr>
 				<td>PinClass</td>
-				<td></td>
+				<td><input type="number" id="pin_class" placeholder="DefaultPinClass"></td>
 			</tr>
 			<tr>
 				<td><label for="frequency">Frequency</label></td>
@@ -250,10 +306,49 @@
 		</table>
 	</div>
 
+	<div class="details" id="detailsSubBlade">
+		<table>
+			<tr>
+				<td><label for="sb_first">First</label></td>
+				<td><input type="number" id="sb_first" value="1"></td>
+			</tr>
+			<tr>
+				<td><label for="sb_last">Last</label></td>
+				<td><input type="number" id="sb_last" value="1"></td>
+			</tr>
+
+			<tr>
+				<td><label for="sb_stride">Stride</label></td>
+				<td><input type="number" id="sb_stride" value="1"></td>
+			</tr>
+			<tr>
+				<td colspan="2">SubBlade Type is automatically choosen by above values<hr></td>
+			</tr>
+			<tr>
+				<td>Blade</td>
+				<td><select id="sb_bladeDefinition"></select></td>
+			</tr>
+
+		</table>
+	</div>
+
+	<div class="details" id="detailsDimBlade">
+		<table>
+			<tr>
+				<td>Blade</td>
+				<td><select id="dim_bladeDefinition"></select></td>
+			</tr>
+			<tr>
+				<td>Brightness %</td>
+				<td><input type="number" id="brightness" value="100"></td>
+			</tr>
+		</table>
+	</div>
+
 	<table style="width: 100%">
 		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
-			<td style="text-align: right"><button onclick="saveBlade()">Create</button></td>
+			<td style="text-align: right"><button onclick="saveBladeDefinition()">Create</button></td>
 		</tr>
 	</table>
 </template>

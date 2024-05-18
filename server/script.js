@@ -1,55 +1,5 @@
-const leds = JSON.parse(sessionStorage.leds || "{}");
-const blades = JSON.parse(sessionStorage.blades || "[]");
-
 let current_template;
 let current_details;
-
-function addNewLED(){
-    showTemplate("tmpNewLED");
-}
-
-function addBlade(){
-    showTemplate("tmpNewBlade");
-}
-
-function saveLed(){
-    leds[getValue("LedName")] = {
-        MaxAmps: getValue("MaxAmps"),
-        MaxVolts: getValue("MaxVolts"),
-        P2Amps: getValue("P2Amps"),
-        P2Volts: getValue("P2Volts"),
-        Resistor: getValue("Resistor"),
-        Color: getValue("Color")
-    }
-
-    // check values
-
-    sessionStorage.setItem('leds', JSON.stringify(leds));
-
-    hideTemplate();
-}
-
-function saveBlade(){
-    const noBlade = blades.length;
-
-    blades[noBlade] = {
-        type: "WS281XBladePtr",
-        leds: getValue("numLeds"),
-        data_pin: getValue("dataPin"),
-        byteorder: getValue("byte_order"),
-        power_pins: getValue("powerpins")
-    }
-
-    if(getValue("pin_class")) blades[noBlade]["pin_class"] = getValue("pin_class");
-    if(getValue("frequency")) blades[noBlade]["frequency"] = getValue("frequency");
-    if(getValue("reset_us")) blades[noBlade]["reset_us"] = getValue("reset_us");
-    if(getValue("t1h")) blades[noBlade]["t1h"] = getValue("t1h");
-    if(getValue("t0h")) blades[noBlade]["t0h"] = getValue("t0h");
-
-    sessionStorage.setItem('blades', JSON.stringify(blades));
-
-    hideTemplate();
-}
 
 function showDetails(evt){
     console.log(evt);
@@ -66,7 +16,31 @@ function showDetails(evt){
         case "WS281XBladePtr":
             tmp = document.getElementById("detailsWS281XBladePtr");
             break;
+
+        case "SubBlade":
+            for(const def in blade_definitions){
+                if(blade_definitions[def]["type"] === "SimpleBladePtr") continue;
+                if(blade_definitions[def]["type"] === "DimBlade") continue;
+                if(blade_definitions[def]["type"] === "SubBlade") continue;
+                if(blade_definitions[def]["type"] === "SubBladeWithStride") continue;
+                if(blade_definitions[def]["type"] === "SubBladeReverse") continue;
+                addOption("sb_bladeDefinition", def);
+            }
+
+            tmp = document.getElementById("detailsSubBlade");
+            break;
+
+        case "DimBlade":
+            for(const def in blade_definitions){
+                addOption("dim_bladeDefinition", def);
+            }
+
+            tmp = document.getElementById("detailsDimBlade");
+            break;
+
     }
+
+    setFocus("bladeName");
 
     tmp.style.display = "inline-block";
     current_details = tmp;
@@ -96,13 +70,16 @@ function getValue(id){
     return false;
 }
 
-function refreshSimpleBlade(){
-    for(const led in leds) {
-        addOption("led1", led);
-        addOption("led2", led);
-        addOption("led3", led);
-        addOption("led4", led);
-    }
+function setValue(id, value){
+    const tmp = document.getElementById(id);
+    if(tmp) tmp.value = value;
+    else return false;
+    return true;
+}
+
+function setFocus(id){
+    const tmp = document.getElementById(id);
+    tmp.focus();
 }
 
 function addOption(selectBox, option){
@@ -113,4 +90,29 @@ function addOption(selectBox, option){
     opt.value = option;
     opt.text = option;
     sb.add(opt);
+}
+
+function getSelectValues(id) {
+    const tmp = document.getElementById(id);
+    if(!tmp) return false;
+
+    let result = "";
+    const options = tmp && tmp.options;
+
+    for (let i = 0; i < options.length; i++) {
+        const opt = options[i];
+
+        if (opt.selected) {
+            if(result !== "") result += ", ";
+            result += (opt.value || opt.text)
+        }
+    }
+    return result;
+}
+
+function removeAllOptions(id){
+    const tmp = document.getElementById(id);
+    if(!tmp) return false;
+
+    tmp.length = 0;
 }
