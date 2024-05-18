@@ -1,13 +1,12 @@
 let current_template;
 let current_details;
 
-function showDetails(evt){
-    console.log(evt);
+function showDetails(){
     let tmp;
 
     if(current_details) current_details.style.display = "none";
 
-    switch(evt.target.value){
+    switch(getValue("newBladeType")){
         case "SimpleBladePtr":
             tmp = document.getElementById("detailsSimpleBlade");
             refreshSimpleBlade();

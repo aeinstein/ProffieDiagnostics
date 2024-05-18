@@ -53,6 +53,16 @@ function saveBladeDefinition(){
 
 
     switch(getValue("newBladeType")){
+    case "SimpleBladePtr":
+        blade_definitions[bladeName] = {
+            type: "SimpleBladePtr",
+            leds: getValue("numLeds"),
+            data_pin: getValue("dataPin"),
+            byteorder: getValue("byte_order"),
+            power_pins: getSelectValues("powerpins")
+        }
+        break;
+
     case "DimBlade":
         blade_definitions[bladeName] = {
             type: "DimBlade",
@@ -106,7 +116,6 @@ function saveBladeDefinition(){
         break;
 
     case "WS281XBladePtr":
-
         if(getValue("numLeds") < 0) {
             alert("Number of leds < 0??");
             setFocus("numLeds");
@@ -231,6 +240,7 @@ function createBladeString(bladeName){
 
 function newBladeDefinition(){
     showTemplate("tmpNewBladeDefinition");
+    showDetails();
 }
 
 function addBlade(){

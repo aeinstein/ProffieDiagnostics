@@ -29,3 +29,8 @@ function refreshSimpleBlade(){
         addOption("led4", led);
     }
 }
+
+function selectLEDTemplate(){
+    getValue("ledTemplate");
+
+}
