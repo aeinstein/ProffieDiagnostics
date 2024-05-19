@@ -5,6 +5,16 @@ body {
     align-content: flex-start;
     align-items: flex-start;
     justify-content: space-evenly;
+    font-family: Arial, Sans-Serif, sans-serif;
+    font-size: 12px;
+}
+
+hr {
+    margin: 5px;
+}
+
+button {
+    min-width: 100px;
 }
 
 .inner {
@@ -57,6 +67,9 @@ body {
 }
 
 #bladeConfig {
+    min-width: 800px;
+    min-height: 250px;
+
     width: 100%;
     font-size: 12px;
 }

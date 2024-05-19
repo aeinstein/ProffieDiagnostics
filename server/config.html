@@ -16,42 +16,58 @@
 	<div id="cntBlades" class="container">
 		<legend>Blade Config</legend>
 		<hr>
-		<button style="float: right" onclick="newBladeDefinition()">New blade definition</button>
-		<button style="float: right" onclick="addBlade()">Add blade</button>
 
-
-		<label for="blade_id">BladeID</label>
-		<select id="blade_id" onchange="refreshBlades()">
-			<option value="0">-- All -- (0)</option>
-		</select>
-		<button onclick="newBladeID()">New bladeID</button>
-
-		Number of blades
-		<input style="width: 40px" type="number" id="num_blades" readonly>
-		<hr>
-
-		<button style="float:right;" onclick="clrBlades()">clear blades</button>
-		<button style="float:right;" onclick="clrBladeID()">clear BladeID</button>
-		<table>
+		<table style="width: 100%">
 			<tr>
-				<td rowspan="2">
-					<select style="min-width: 200px" id="currentBlades" multiple></select>
+				<td>
+					<label for="blade_id">BladeID</label>
+					<select id="blade_id" onchange="refreshBlades()">
+						<option value="0">-- All -- (0)</option>
+					</select>
+					<button onclick="newBladeID()">New bladeID</button>
 				</td>
-				<td>Presets</td>
-				<td><select id="preset">
-					<option>presets</option>
-				</select></td>
-			</tr>
-
-			<tr>
-				<td>Save Folder</td>
-				<td><input type="text" id="saveDir"></td>
+				<td>
+					Number of blades
+					<input style="width: 30px; text-align: center" type="text" id="num_blades" readonly>
+				</td>
+				<td style="text-align: right">
+					<button onclick="newBladeDefinition()">New blade definition</button>
+				</td>
 			</tr>
 		</table>
-
-
 		<hr>
-		<textarea id="bladeConfig" style="min-width: 600px; min-height: 200px"></textarea>
+		<table style="width: 100%">
+			<tr>
+				<td style="vertical-align: top">
+					Current<br>Blades
+				</td>
+				<td>
+					<select style="min-width: 200px" id="currentBlades" multiple></select>
+				</td>
+				<td>
+					<table>
+						<tr>
+							<td>Presets</td>
+							<td><select id="preset">
+								<option>presets</option>
+							</select></td>
+						</tr>
+
+						<tr>
+							<td>Save Folder</td>
+							<td><input type="text" id="saveDir"></td>
+						</tr>
+					</table>
+				</td>
+				<td style="vertical-align: top; text-align: right; width: 200px">
+					<button onclick="addBlade()">Add blade</button>
+					<button onclick="clrBlades()">clear blades</button>
+					<button onclick="clrBladeID()">clear BladeID</button>
+				</td>
+			</tr>
+		</table>
+		<hr>
+		<textarea id="bladeConfig"></textarea>
 	</div>
 	<br>
 	<div id="lstBladeDefinitions">
@@ -70,7 +86,17 @@
 	<table>
 		<tr>
 			<td>BladeID (Resisitor)</td>
-			<td><input type="number" id="newBladeID" value="0"></td>
+			<td><input type="number" id="newBladeID" value="0" maxlength="6" style="width:60px; text-align: right"></td>
+		</tr>
+		<tr>
+			<td>Presets</td>
+			<td><select id="newBladePresets">
+				<option>presets</option>
+			</select></td>
+		</tr>
+		<tr>
+			<td>Save Folder</td>
+			<td><input type="text" id="newBladeSaveFolder" placeholder="nb_save"></td>
 		</tr>
 		<tr>
 			<td colspan="2"><hr></td>

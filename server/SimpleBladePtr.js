@@ -40,7 +40,7 @@ function saveLed(){
         setFocus("Resistor");
         return;
     }
-    
+
     leds[getValue("LedName")] = {
         MaxAmps: getValue("MaxAmps"),
         MaxVolts: getValue("MaxVolts"),
@@ -74,7 +74,6 @@ function selectLEDTemplate(){
     setValue("P2Amps", values[3]);
     setValue("Resistor", values[4]);
     setValue("Color", values[5]);
-
 }
 
 function addBuiltInLEDs(){
