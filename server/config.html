@@ -3,80 +3,13 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Title</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="script.js"></script>
 	<script src="SimpleBladePtr.js"></script>
 	<script src="WS281XBladePtr.js"></script>
 	<script src="blades.js"></script>
 </head>
-<style>
-	body {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: flex-start;
-        align-items: flex-start;
-        justify-content: space-evenly;
-	}
 
-	.inner {
-		width: 100%;
-		height: 100%;
-        font-family: monospace;
-        font-size: 11px;
-        tab-size: 10px;
-	}
-
-	.container {
-        border: 1px solid black;
-		padding: 5px;
-	}
-
-	.details {
-		display: none;
-	}
-
-	.modal {
-        border: 1px solid silver;
-        box-shadow: 0 0 15px black;
-        position: fixed;
-        background-color: #373737;
-        top: 50%;
-        transform: translate(0px, -50%);
-        padding: 5px;
-		color: white;
-		font-family: arial, sans-serif;
-	}
-
-
-    .modal table tr td:nth-child(2) {
-		padding-right: 5px;
-		width: 50px;
-		text-align: right;
-	}
-
-    #MaxVolts, #MaxAmps, #P2Amps, #P2Volts, #Resistor, #Color  {
-		width: 50px;
-	}
-
-	.pin, .led {
-		width: 70px;
-		text-align: center;
-	}
-
-    .pin {
-		width: 50px;
-	}
-
-	#bladeConfig {
-		width: 100%;
-	}
-
-	textarea {
-        box-sizing: border-box;
-	}
-
-
-</style>
 <body>
 
 <div>
@@ -140,6 +73,9 @@
 			<td><input type="number" id="newBladeID" value="0"></td>
 		</tr>
 		<tr>
+			<td colspan="2"><hr></td>
+		</tr>
+		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
 			<td style="text-align: right"><button onclick="saveNewBladeID()">Create</button></td>
 		</tr>
@@ -155,6 +91,9 @@
 			<td><select id="bladeDefinition"></select></td>
 		</tr>
 		<tr>
+			<td colspan="2"><hr></td>
+		</tr>
+		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
 			<td style="text-align: right"><button onclick="saveAddBlade()">Create</button></td>
 		</tr>
@@ -164,11 +103,10 @@
 <template id="tmpNewBladeDefinition">
 	New Blade Definition<br>
 	<hr>
-
 	<table style="width: 100%">
 		<tr>
 			<td>
-				Name
+				<label for="bladeName">Name</label>
 			</td>
 			<td>
 				<input type="text" id="bladeName" placeholder="Name">
@@ -177,7 +115,7 @@
 
 		<tr>
 			<td>
-				Blade Type
+				<label for="newBladeType">Blade Type</label>
 			</td>
 			<td>
 				<select id="newBladeType" onchange="showDetails()">
@@ -190,28 +128,18 @@
 		</tr>
 	</table>
 
+	<hr>
+
 	<div class="details" id="detailsSimpleBlade">
-		<hr>
-		<button id="btnNewLED" onclick="addNewLED()">Neue LED</button>
+		<button style="float: right" id="btnNewLED" onclick="addNewLED()">Neue LED</button>
 		<div id="ledArray">
 			<table>
 				<tr>
-					<td>
-						<select class="led" id="led1"><option value="">NoLed</option></select>
-					</td>
-					<td>
-						<select class="led" id="led2"><option value="">NoLed</option></select>
-					</td>
-					<td>
-						<select class="led" id="led3"><option value="">NoLed</option></select>
-					</td>
-					<td>
-						<select class="led" id="led4"><option value="">NoLed</option></select>
-					</td>
-				</tr>
-				<tr>
+					<td><label for="led1">Led 1</label></td>
+					<td><select class="led" id="led1"><option value="">NoLed</option></select></td>
 					<td>
 						<select id="pin1">
+							<option value="-1">Not connected</option>
 							<option>bladePowerPin1</option>
 							<option>bladePowerPin2</option>
 							<option>bladePowerPin3</option>
@@ -220,32 +148,50 @@
 							<option>bladePowerPin6</option>
 						</select>
 					</td>
+				</tr>
+
+				<tr>
+					<td><label for="led2">Led 2</label></td>
+					<td><select class="led" id="led2"><option value="">NoLed</option></select></td>
 					<td>
 						<select id="pin2">
+							<option value="-1">Not connected</option>
 							<option>bladePowerPin1</option>
-							<option selected>bladePowerPin2</option>
+							<option>bladePowerPin2</option>
 							<option>bladePowerPin3</option>
 							<option>bladePowerPin4</option>
 							<option>bladePowerPin5</option>
 							<option>bladePowerPin6</option>
 						</select>
 					</td>
+				</tr>
+
+				<tr>
+					<td><label for="led3">Led 3</label></td>
+					<td><select class="led" id="led3"><option value="">NoLed</option></select></td>
 					<td>
 						<select id="pin3">
+							<option value="-1">Not connected</option>
 							<option>bladePowerPin1</option>
 							<option>bladePowerPin2</option>
-							<option selected>bladePowerPin3</option>
+							<option>bladePowerPin3</option>
 							<option>bladePowerPin4</option>
 							<option>bladePowerPin5</option>
 							<option>bladePowerPin6</option>
 						</select>
 					</td>
+				</tr>
+
+				<tr>
+					<td><label for="led4">Led 4</label></td>
+					<td><select class="led" id="led4"><option value="">NoLed</option></select></td>
 					<td>
 						<select id="pin4">
+							<option value="-1">Not connected</option>
 							<option>bladePowerPin1</option>
 							<option>bladePowerPin2</option>
 							<option>bladePowerPin3</option>
-							<option selected>bladePowerPin4</option>
+							<option>bladePowerPin4</option>
 							<option>bladePowerPin5</option>
 							<option>bladePowerPin6</option>
 						</select>
@@ -257,9 +203,6 @@
 
 	<div class="details" id="detailsWS281XBladePtr">
 		<table>
-			<tr>
-				<td colspan="2"><hr></td>
-			</tr>
 			<tr>
 				<td><label for="numLeds">Number of Leds</label></td>
 				<td><input type="number" id="numLeds" value="144" style="width: 50px" min="1" max="1024"></td>
@@ -350,28 +293,27 @@
 	</div>
 
 	<div class="details" id="detailsSubBlade">
-		<table>
+		<table style="width: 100%">
+			<tr>
+				<td><label for="sb_bladeDefinition">Blade</label></td>
+				<td><select id="sb_bladeDefinition"></select></td>
+			</tr>
 			<tr>
 				<td><label for="sb_first">First</label></td>
-				<td><input type="number" id="sb_first" value="1"></td>
+				<td><input type="number" id="sb_first" value="1" maxlength="3" min="1" max="1024"></td>
 			</tr>
 			<tr>
 				<td><label for="sb_last">Last</label></td>
-				<td><input type="number" id="sb_last" value="1"></td>
+				<td><input type="number" id="sb_last" value="1" maxlength="3" min="1" max="1024"></td>
 			</tr>
 
 			<tr>
 				<td><label for="sb_stride">Stride</label></td>
-				<td><input type="number" id="sb_stride" value="1"></td>
+				<td><input type="number" id="sb_stride" value="1" maxlength="3" min="1" max="500"></td>
 			</tr>
 			<tr>
-				<td colspan="2">SubBlade Type is automatically choosen by above values<hr></td>
+				<td colspan="2"><br>SubBlade Type is automatically<br>choosen by above values</td>
 			</tr>
-			<tr>
-				<td>Blade</td>
-				<td><select id="sb_bladeDefinition"></select></td>
-			</tr>
-
 		</table>
 	</div>
 
@@ -388,6 +330,7 @@
 		</table>
 	</div>
 
+	<hr>
 	<table style="width: 100%">
 		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
@@ -427,28 +370,31 @@
 		</tr>
 		<tr>
 			<td>MaxAmps</td>
-			<td><input type="text" id="MaxAmps" value="1.0"></td>
+			<td><input type="number" id="MaxAmps" value="1.0" min="0.1" max="3.9" step="0.05"></td>
 		</tr>
 		<tr>
 			<td>MaxVolts</td>
-			<td><input type="text" id="MaxVolts" value="3.15"></td>
+			<td><input type="number" id="MaxVolts" value="3.15" min="0.1" max="3.9" step="0.05"></td>
 		</tr>
 		<tr>
 			<td>P2Amps</td>
-			<td><input type="text" id="P2Amps" value="0.7"></td>
+			<td><input type="number" id="P2Amps" value="0.7" min="0.1" max="3.9" step="0.05"></td>
 		</tr>
 		<tr>
 			<td>P2Volts</td>
-			<td><input type="text" id="P2Volts" value="3.05"></td>
+			<td><input type="number" id="P2Volts" value="3.05" min="0.1" max="3.9" step="0.05"></td>
 		</tr>
 		<tr>
-			<td>Resistor</td>
-			<td><input type="text" id="Resistor" value="0.55"></td>
+			<td>Resistor in milliohm m&#x3A9; !</td>
+			<td><input type="number" id="Resistor" value="550" min="0" max="2000" step="10"></td>
 		</tr>
 		<tr>
 			<td>Color</td>
 			<td><input type="color" id="Color"></td>
 		</tr>
+	</table>
+	<hr>
+	<table style="width: 100%">
 		<tr>
 			<td>
 				<button onclick="hideTemplate()">Cancel</button>
