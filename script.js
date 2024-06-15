@@ -59,8 +59,8 @@ let loop_running = false;
 
 const filters = [
     {
-        'vendorId': usbVendorId,
-        'productId': usbProductId
+        usbVendorId
+        //'productId': usbProductId
     }
 ];
 
@@ -241,8 +241,6 @@ function openTop(){
     topCalled = true;
     SendSerial("top");
 }
-
-
 
 function closeTop(){
     if(topPID >= 0) window.clearInterval(topPID);
@@ -1126,6 +1124,7 @@ async function RunSerial() {
     if (ports.length === 1) {
         serial_port = ports[0];
     } else {
+        console.log(filters);
         serial_port = await navigator.serial.requestPort({'filters': filters});
     }
 
