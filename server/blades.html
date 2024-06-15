@@ -12,11 +12,11 @@
 
 <body>
 
-<div>
+<div style="width: 100%">
 	<div id="cntBlades" class="container">
+		<button onclick="showTemplate('tmpBladeHelp')" style="float: right">Help</button>
 		<legend>Blade Config</legend>
 		<hr>
-
 		<table style="width: 100%">
 			<tr>
 				<td>
@@ -24,7 +24,9 @@
 					<select id="blade_id" onchange="refreshBlades()">
 						<option value="0">-- All -- (0)</option>
 					</select>
-					<button onclick="newBladeID()">New bladeID</button>
+					<button class="b1" onclick="editBladeID()">Edit</button>
+					<button class="b1" onclick="newBladeID()">New</button>
+					<button class="b1" onclick="clrBladeID()">Delete</button>
 				</td>
 				<td>
 					Number of blades
@@ -42,27 +44,15 @@
 					Current<br>Blades
 				</td>
 				<td>
-					<select style="min-width: 200px" id="currentBlades" multiple></select>
+					<select style="min-width: 200px" id="currentBlades" ondblclick="editBlade()" multiple></select>
 				</td>
 				<td>
-					<table>
-						<tr>
-							<td>Presets</td>
-							<td><select id="preset">
-								<option>presets</option>
-							</select></td>
-						</tr>
 
-						<tr>
-							<td>Save Folder</td>
-							<td><input type="text" id="saveDir"></td>
-						</tr>
-					</table>
 				</td>
 				<td style="vertical-align: top; text-align: right; width: 200px">
 					<button onclick="addBlade()">Add blade</button>
 					<button onclick="clrBlades()">clear blades</button>
-					<button onclick="clrBladeID()">clear BladeID</button>
+
 				</td>
 			</tr>
 		</table>
@@ -70,14 +60,8 @@
 		<textarea id="bladeConfig"></textarea>
 	</div>
 	<br>
-	<div id="lstBladeDefinitions">
-	</div>
-	<div class="container"><textarea id="buttons" class="inner"></textarea></div>
-</div>
-
-<div>
-	<div class="container"><textarea id="styles" class="inner"></textarea></div>
-	<div class="container"><textarea id="presets" class="inner"></textarea></div>
+	<div id="lstBladeDefinitions"></div>
+	<div class="container" id="lstErrors"></div>
 </div>
 
 <template id="tmpNewBladeID">
@@ -86,24 +70,25 @@
 	<table>
 		<tr>
 			<td>BladeID (Resisitor)</td>
-			<td><input type="number" id="newBladeID" value="0" maxlength="6" style="width:60px; text-align: right"></td>
+			<td><input type="number" id="newBladeID" min="-1" max="700000" value="0" maxlength="6" style="width:65px; text-align: right"></td>
 		</tr>
 		<tr>
 			<td>Presets</td>
 			<td><select id="newBladePresets">
 				<option>presets</option>
+				<option>no_blade</option>
 			</select></td>
 		</tr>
 		<tr>
 			<td>Save Folder</td>
-			<td><input type="text" id="newBladeSaveFolder" placeholder="nb_save"></td>
+			<td><input type="text" id="newBladeSaveFolder" placeholder="example: nb_save"></td>
 		</tr>
 		<tr>
 			<td colspan="2"><hr></td>
 		</tr>
 		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
-			<td style="text-align: right"><button onclick="saveNewBladeID()">Create</button></td>
+			<td style="text-align: right"><button onclick="saveNewBladeID()">Save</button></td>
 		</tr>
 	</table>
 </template>
@@ -113,7 +98,7 @@
 	<hr>
 	<table style="width: 100%">
 		<tr>
-			<td>Blade</td>
+			<td>Blade Definition</td>
 			<td><select id="bladeDefinition"></select></td>
 		</tr>
 		<tr>
@@ -121,7 +106,7 @@
 		</tr>
 		<tr>
 			<td><button onclick="hideTemplate()">Cancel</button></td>
-			<td style="text-align: right"><button onclick="saveAddBlade()">Create</button></td>
+			<td style="text-align: right"><button onclick="saveAddBlade()">Save</button></td>
 		</tr>
 	</table>
 </template>
@@ -427,6 +412,27 @@
 			</td>
 			<td style="text-align: right">
 				<button onclick="saveLed()">Create</button>
+			</td>
+		</tr>
+	</table>
+</template>
+
+<template id="tmpBladeHelp">
+	Quick Start<br>
+	<hr>
+	<ol>
+		<li>Add a Blade ID</li>
+		<li>Add min. one Blade Definition</li>
+		<li>Add Blade Definition to BladeID</li>
+	</ol>
+	<hr>
+	<table style="width: 100%">
+		<tr>
+			<td>
+				<button onclick="hideTemplate()">Cancel</button>
+			</td>
+			<td style="text-align: right">
+
 			</td>
 		</tr>
 	</table>

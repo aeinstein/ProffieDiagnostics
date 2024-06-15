@@ -1,5 +1,6 @@
 const blade_definitions = JSON.parse(localStorage.blade_definitions || "{}");
 const blades = JSON.parse(localStorage.blades || "{}");
+let stored_blade_string;
 
 function clrBlades(){
     const blade_id = getValue("blade_id");
@@ -24,14 +25,36 @@ function clrBladeID(){
 
 function newBladeID(){
     showTemplate("tmpNewBladeID");
+    document.getElementById("newBladeID").readOnly = false;
+}
+
+function editBladeID(){
+    showTemplate("tmpNewBladeID");
+    setValue("newBladeID", getValue("blade_id"));
+    setValue("newBladePresets", blades[blade_id]["presets"]);
+    setValue("newBladeSaveFolder", blades[blade_id]["newBladeSaveFolder"])
+    document.getElementById("newBladeID").readOnly = true;
 }
 
 function saveNewBladeID(){
-    blades[getValue("newBladeID")] = {
-        presets: "presets",
-        blades: [],
-        save_dir: ""
-    };
+    if(blades.hasOwnProperty(getValue("newBladeID"))) {
+        let tmp = {
+            presets: getValue("newBladePresets"),
+            save_dir: getValue("newBladeSaveFolder")
+        };
+
+
+        blades[getValue("newBladeID")] = merge_options(blades[getValue("newBladeID")], tmp);
+
+    } else {
+        blades[getValue("newBladeID")] = {
+            presets: getValue("newBladePresets"),
+            blades: [],
+            save_dir: getValue("newBladeSaveFolder")
+        };
+    }
+
+
     localStorage.setItem('blades', JSON.stringify(blades));
 
     refreshBladeIDs();
@@ -146,13 +169,18 @@ function saveBladeDefinition(){
 
 function buildConfig(){
     //const blade_id = getValue("blade_id");
+    displayError("No Errors found");
 
     setValue("num_blades", getMaxBladeNumber());
-
 
     let bladeArray = "BladeConfig blades[] = {\n";
 
     for(const blade_id in blades) {
+        if(blades[blade_id].blades.length !== getMaxBladeNumber()) {
+            displayError("BladeID " + blade_id + " must have " + getMaxBladeNumber() + " blades");
+            //continue;
+        }
+
         stored_blade_string = "";
 
         console.log("writing blade: " + blade_id);
@@ -171,10 +199,6 @@ function buildConfig(){
     bladeArray += "}\n";
     document.getElementById("bladeConfig").innerHTML = bladeArray;
 }
-
-
-
-let stored_blade_string;
 
 function createBladeString(bladeName){
     console.log("createBladeString: ", bladeName);
@@ -252,6 +276,22 @@ function addBlade(){
     }
 }
 
+
+function refreshDefinitions(){
+    const definitions = document.getElementById("lstBladeDefinitions");
+    let tmp = "<table>";
+
+    for(let definition in blade_definitions){
+        tmp += "<tr>";
+        tmp += "<td>" + definition + "</td>";
+        tmp += "<td>" + JSON.stringify(blade_definitions[definition]) + "</td>";
+        tmp += "</tr>";
+    }
+
+    tmp += "</table>";
+    definitions.innerHTML = tmp;
+}
+
 function saveAddBlade(){
     const blade_id = getValue("blade_id");
     console.log("BladeID: " + blade_id);
@@ -263,7 +303,7 @@ function saveAddBlade(){
 
     if(!blades[blade_id]) {
         blades[blade_id] = {
-            preset: "presets",
+            presets: "presets",
             blades: [],
             save_dir: ""
         };
@@ -315,6 +355,11 @@ function refreshBladeIDs(){
 function init(){
     refreshBladeIDs();
     refreshBlades();
+    refreshDefinitions();
+}
+
+function displayError(txt){
+    document.getElementById("lstErrors").innerHTML = txt;
 }
 
 window.addEventListener("load", init);

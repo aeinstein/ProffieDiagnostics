@@ -115,3 +115,11 @@ function removeAllOptions(id){
 
     tmp.length = 0;
 }
+
+function merge_options(obj1,obj2){
+    let attrname;
+    const obj3 = {};
+    for (attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
+}

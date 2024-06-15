@@ -17,6 +17,11 @@ button {
     min-width: 100px;
 }
 
+button.b1 {
+    width: 60px;
+    min-width: initial;
+}
+
 .inner {
     width: 100%;
     height: 100%;
@@ -76,4 +81,9 @@ button {
 
 textarea {
     box-sizing: border-box;
+}
+
+#lstErrors{
+    color: white;
+    background-color: darkred;
 }
