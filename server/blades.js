@@ -177,7 +177,7 @@ function buildConfig(){
 
     for(const blade_id in blades) {
         if(blades[blade_id].blades.length !== getMaxBladeNumber()) {
-            displayError("BladeID " + blade_id + " must have " + getMaxBladeNumber() + " blades");
+            displayError("BladeID " + blade_id + " must have " + getMaxBladeNumber() + " blades", true);
             //continue;
         }
 
@@ -358,8 +358,13 @@ function init(){
     refreshDefinitions();
 }
 
-function displayError(txt){
-    document.getElementById("lstErrors").innerHTML = txt;
+function displayError(txt, isError){
+    const elem = document.getElementById("lstErrors");
+
+    if(isError) elem.className = "error";
+    else elem.className = "";
+
+    elem.innerHTML = txt;
 }
 
 window.addEventListener("load", init);

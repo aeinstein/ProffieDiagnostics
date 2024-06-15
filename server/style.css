@@ -83,7 +83,11 @@ textarea {
     box-sizing: border-box;
 }
 
-#lstErrors{
+#lstErrors {
     color: white;
+    background-color: darkgreen;
+}
+
+#lstErrors.error {
     background-color: darkred;
 }
