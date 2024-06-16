@@ -79,10 +79,14 @@ function saveBladeDefinition(){
     case "SimpleBladePtr":
         blade_definitions[bladeName] = {
             type: "SimpleBladePtr",
-            leds: getValue("numLeds"),
-            data_pin: getValue("dataPin"),
-            byteorder: getValue("byte_order"),
-            power_pins: getSelectValues("powerpins")
+            led1: getValue("led1"),
+            led2: getValue("led2"),
+            led3: getValue("led3"),
+            led4: getValue("led4"),
+            powerPin1: getValue("pin1"),
+            powerPin2: getValue("pin2"),
+            powerPin3: getValue("pin3"),
+            powerPin4: getValue("pin4")
         }
         break;
 
@@ -188,7 +192,10 @@ function buildConfig(){
         bladeArray += "    " + blade_id + ",\n";
 
         for (let i = 0; i < blades[blade_id]["blades"].length; i++) {
-            bladeArray += "    " + createBladeString(blades[blade_id]["blades"][i]) + ",\n";
+            let bladeName = blades[blade_id]["blades"][i]
+            bladeArray += "    " + createBladeString(bladeName) + ",";
+            bladeArray += " // " + bladeName;
+            bladeArray += "\n";
         }
 
         bladeArray += "    CONFIGARRAY(" + blades[blade_id]["presets"] + ")\n"
@@ -203,6 +210,10 @@ function buildConfig(){
 function createBladeString(bladeName){
     console.log("createBladeString: ", bladeName);
 
+    // inject dummy blade entry
+    if(bladeName === "Dummy") {
+        return "SimpleBladePtr<NoLED, NoLED, NoLED, NoLED, -1. -1, -1, -1>()";
+    }
 
     const curBlade = blade_definitions[bladeName];
 
@@ -210,6 +221,10 @@ function createBladeString(bladeName){
     let tmpString;
 
     switch(curBlade["type"]) {
+        case "SimpleBladePtr":
+
+            break;
+
         case "WS281XBladePtr":
             bladeString = curBlade["type"] + "<" + curBlade["leds"] + ", " + curBlade["data_pin"] + ", " + curBlade["byteorder"] + ", ";
 
@@ -267,8 +282,15 @@ function newBladeDefinition(){
     showDetails();
 }
 
+function editBladeDefinitions(){
+    showTemplate("tmpListBladeDefinitions");
+    refreshDefinitions();
+}
+
 function addBlade(){
     showTemplate("tmpAddBlade");
+
+    addOption("bladeDefinition", "Dummy");
 
     for(const def in blade_definitions){
         console.log(def);
@@ -317,9 +339,14 @@ function saveAddBlade(){
 }
 
 function refreshBlades(){
+    removeAllOptions("currentBlades");
+
     const blade_id = getValue("blade_id");
 
-    removeAllOptions("currentBlades");
+    if(!blades.hasOwnProperty(blade_id)) {
+        displayError("You need at least one BladeID", true);
+        return;
+    }
 
     for(let i = 0; i < blades[blade_id]["blades"].length; i++){
         addOption("currentBlades", blades[blade_id]["blades"][i]);
@@ -355,7 +382,6 @@ function refreshBladeIDs(){
 function init(){
     refreshBladeIDs();
     refreshBlades();
-    refreshDefinitions();
 }
 
 function displayError(txt, isError){
@@ -368,3 +394,4 @@ function displayError(txt, isError){
 }
 
 window.addEventListener("load", init);
+

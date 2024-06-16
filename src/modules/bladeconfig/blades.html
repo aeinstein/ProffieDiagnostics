@@ -6,7 +6,6 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="script.js"></script>
 	<script src="SimpleBladePtr.js"></script>
-	<script src="WS281XBladePtr.js"></script>
 	<script src="blades.js"></script>
 </head>
 
@@ -34,6 +33,7 @@
 				</td>
 				<td style="text-align: right">
 					<button onclick="newBladeDefinition()">New blade definition</button>
+					<button onclick="editBladeDefinitions()">Edit blade definitions</button>
 				</td>
 			</tr>
 		</table>
@@ -60,7 +60,6 @@
 		<textarea id="bladeConfig"></textarea>
 	</div>
 	<br>
-	<div id="lstBladeDefinitions"></div>
 	<div class="container" id="lstErrors"></div>
 </div>
 
@@ -433,6 +432,21 @@
 			</td>
 			<td style="text-align: right">
 
+			</td>
+		</tr>
+	</table>
+</template>
+
+<template id="tmpListBladeDefinitions">
+	Blade definitions<br>
+	<div id="lstBladeDefinitions"></div>
+	<table style="width: 100%">
+		<tr>
+			<td>
+				<button onclick="hideTemplate()">Cancel</button>
+			</td>
+			<td style="text-align: right">
+				
 			</td>
 		</tr>
 	</table>
